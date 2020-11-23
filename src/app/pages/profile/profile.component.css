@@ -1,0 +1,19 @@
+.profile-box {
+    background-color: #f8f9fa59;
+}
+
+.info {
+    font-size: 18px;
+    padding: 10px;
+    border-bottom: 0.5px solid #007bff;
+}
+
+.info-label {
+    color: #007bff;
+    margin-bottom: 5px;
+}
+
+.icon {
+    cursor: pointer;
+    color: #007bff;
+}

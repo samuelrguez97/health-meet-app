@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "health-meet-app": {
+      "hosting": {
+        "healthMeet": [
+          "health-meet-app"
+        ]
+      }
+    }
+  }
+}
