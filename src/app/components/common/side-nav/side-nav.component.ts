@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { UserData } from 'src/app/shared/models/user-data.model';
@@ -14,11 +15,15 @@ export class SideNavComponent implements OnInit {
   user: UserData = null;
   userPhysio: string;
 
+  isMobile: boolean;
+  showMenuMobile: boolean;
+
   show = false;
 
   public loadingLogOut = false;
 
   constructor(
+    private breakpointObserver: BreakpointObserver,
     private authService: AuthService,
     private userDataService: UserDataService,
     private navbarService: NavbarService,
@@ -29,6 +34,19 @@ export class SideNavComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.getCurrentUser();
+    this.checkIfMobile();
+  }
+
+  checkIfMobile(): void {
+    this.breakpointObserver
+      .observe(['(min-width: 500px)'])
+      .subscribe((state: BreakpointState) => {
+        if (state.matches) {
+          this.isMobile = false;
+        } else {
+          this.isMobile = true;
+        }
+      });
   }
 
   async getCurrentUser(): Promise<void> {
@@ -77,8 +95,11 @@ export class SideNavComponent implements OnInit {
     this.loadingLogOut = false;
     this.user = null;
     this.show = false;
+    this.showMenuMobile = false;
     setTimeout(() => this.router.navigate(['']), 10);
   }
 
-  checkUrl(): void {}
+  toggleMenu(): void {
+    this.showMenuMobile = !this.showMenuMobile;
+  }
 }

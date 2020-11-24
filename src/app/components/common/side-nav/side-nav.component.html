@@ -1,13 +1,25 @@
 <div *ngIf="show" class="mb-5">
-    <div class="shadow p-3 bg-white rounded d-flex justify-content-between align-items-center">
-        <div class="d-flex">
+    <div class="menu shadow p-3 bg-white rounded d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
             <div class="mr-4 info title-info"><span *ngIf="user.name; else loading">Hola, <b>{{ user?.name }}</b></span>
             </div>
-            <div class="title-link mr-3" [routerLink]="['home']" routerLinkActive="active">Calendario</div>
-            <div class="title-link mr-3" [routerLink]="['profile']" routerLinkActive="active">Tu perfil</div>
+            <div class="d-flex" *ngIf="!isMobile">
+                <div class="title-link mr-3" [routerLink]="['home']" routerLinkActive="active">Calendario</div>
+                <div class="title-link mr-3" [routerLink]="['profile']" routerLinkActive="active">Tu perfil</div>
+            </div>
         </div>
-        <button *ngIf="!loadingLogOut" href="#" class="btn btn-primary" (click)="logOut()">Cerrar
+        <button *ngIf="!loadingLogOut && !isMobile" href="#" class="btn btn-primary" (click)="logOut()">Cerrar
             sesión</button>
+        <div *ngIf="isMobile" (click)="toggleMenu()"><i class="menuIcon material-icons">{{ showMenuMobile ? 'menu_open' : 'menu' }}</i></div>
+        <div *ngIf="showMenuMobile" class="mobile-menu shadow rounded d-flex flex-column p-2 justify-content-around">
+            <div class="title-link mr-3" [routerLink]="['home']" routerLinkActive="active" (click)="toggleMenu()">
+                Calendario</div>
+            <div class="title-link mr-3" [routerLink]="['profile']" routerLinkActive="active" (click)="toggleMenu()">
+                Tu perfil</div>
+            <button *ngIf="!loadingLogOut" href="#" class="btn btn-primary" (click)="logOut()">Cerrar
+                sesión</button>
+        </div>
+
     </div>
     <div class="mt-5 info d-flex align-items-center">
         <span>Tu fisioterapeuta actual es: </span>

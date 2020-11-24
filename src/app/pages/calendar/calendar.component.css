@@ -2,3 +2,9 @@
     background-color: white;
     padding: 30px;
 }
+
+@media (max-width: 500px) {
+    .calendarBox {
+        padding: 5px;
+    }
+}

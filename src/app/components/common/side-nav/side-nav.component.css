@@ -1,3 +1,7 @@
+.menu {
+    position: relative;
+}
+
 .info {
     font-size: 20px;
     color: #007bff;
@@ -23,4 +27,19 @@
 
 .active {
     color: #007bff;
+}
+
+.menuIcon {
+    font-size: 40px;
+    color: #212529a8;
+}
+
+.mobile-menu {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background-color: white;
+    top: 80px;
+    right: 0;
+    z-index: 100;
 }
