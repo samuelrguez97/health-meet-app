@@ -22,7 +22,6 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ProfileComponent } from './pages/profile/profile.component';
-import { ChangePhysioComponent } from './pages/change-physio/change-physio.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 FullCalendarModule.registerPlugins([
@@ -40,7 +39,6 @@ FullCalendarModule.registerPlugins([
     SideNavComponent,
     CalendarComponent,
     ProfileComponent,
-    ChangePhysioComponent,
   ],
   imports: [
     BrowserModule,

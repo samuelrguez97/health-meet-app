@@ -78,8 +78,8 @@
                                                                 <label for="selectFisioterapeuta">Selecciona tu
                                                                     fisioterapeuta
                                                                     *</label>
-                                                                <select class="form-control" id="selectFisioterapeuta" formControlName="fisioterapeuta">
-                                                                    <option>Lucia</option>
+                                                                <select class="form-control" id="selectFisioterapeuta" formControlName="physio" [disabled]="loadingPhysios">
+                                                                    <option *ngFor="let physio of physios" [value]="physio.uid">{{ physio.name }}</option>
                                                                 </select>
                                                                 <small id="selectHelp" class="form-text text-muted">*
                                                                     Debe

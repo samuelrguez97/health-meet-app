@@ -3,14 +3,13 @@ import { CanActivate, Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth/auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class AuthGuardService implements CanActivate {
-
-  constructor(private authService: AuthService, private router: Router) {}
+export class AuthGuard implements CanActivate {
+  constructor(private auth: AuthService, private router: Router) {}
 
   async canActivate(): Promise<boolean> {
-    const user = await this.authService.getCurrentUser();
+    const user = await this.auth.getCurrentUser();
     if (!user) {
       this.router.navigate(['']);
       return false;

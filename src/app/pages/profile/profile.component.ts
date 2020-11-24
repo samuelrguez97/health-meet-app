@@ -91,13 +91,17 @@ export class ProfileComponent implements OnInit {
           value = '';
       }
       this.user = { ...this.user, [field]: value };
-      if (field === 'email') {
-        this.userDataService.updateUserData(this.user.uid, true, value, () => {
+      this.userDataService.updateUserData(
+        this.user.key,
+        field === 'email',
+        field,
+        value,
+        () => {
           this.loading = { ...this.loading, [field]: false };
           this.getUserData();
           this.navbarService.dispathNavbar();
-        });
-      }
+        }
+      );
     }
   }
 }

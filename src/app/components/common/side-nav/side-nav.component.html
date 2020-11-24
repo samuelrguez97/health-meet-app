@@ -1,19 +1,17 @@
 <div *ngIf="show" class="mb-5">
     <div class="shadow p-3 bg-white rounded d-flex justify-content-between align-items-center">
         <div class="d-flex">
-            <div class="mr-4 info title-info"><span *ngIf="user; else loading">Hola, <b>{{ user?.name }}</b></span>
+            <div class="mr-4 info title-info"><span *ngIf="user.name; else loading">Hola, <b>{{ user?.name }}</b></span>
             </div>
             <div class="title-link mr-3" [routerLink]="['home']" routerLinkActive="active">Calendario</div>
             <div class="title-link mr-3" [routerLink]="['profile']" routerLinkActive="active">Tu perfil</div>
-            <div class="title-link" [routerLink]="['change-physio']" routerLinkActive="active">Cambiar de fisioterapeuta
-            </div>
         </div>
         <button *ngIf="!loadingLogOut" href="#" class="btn btn-primary" (click)="logOut()">Cerrar
             sesión</button>
     </div>
     <div class="mt-5 info d-flex align-items-center">
         <span>Tu fisioterapeuta actual es: </span>
-        <span class="ml-2"><b *ngIf="user; else loadingInText">{{ user?.fisioterapeuta }}</b></span>
+        <span class="ml-2"><b *ngIf="userPhysio; else loadingInText">{{ userPhysio }}</b></span>
     </div>
 </div>
 

@@ -9,10 +9,10 @@ import {
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { Alert } from '../../shared/models/alert.model';
 import { UserData } from '../../shared/models/user-data.model';
 import { NavbarService } from '../../shared/services/navbar/navbar.service';
 import { ServiceError } from '../../shared/models/service-error.model';
+import { UserDataService } from '../../shared/services/user-data/user-data.service';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +21,7 @@ import { ServiceError } from '../../shared/models/service-error.model';
 })
 export class LoginComponent implements OnInit {
   public loading = false;
+  public loadingPhysios = false;
 
   public isWhatCollapsed = true;
   public isHowCollapsed = true;
@@ -28,6 +29,8 @@ export class LoginComponent implements OnInit {
 
   public activeLogIn = 1;
   public activeSignUpForm = 1;
+
+  public physios = [];
 
   logInError: ServiceError = {
     error: false,
@@ -46,21 +49,27 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private formBuilder: FormBuilder,
     private navbarService: NavbarService,
-    private authService: AuthService
+    private authService: AuthService,
+    private userDataService: UserDataService
   ) {
     this.crearFormularios();
   }
 
-  async ngOnInit(): Promise<void> {
-    const user = await this.authService.getCurrentUser();
-    if (user) {
-      this.router.navigate(['/home']);
-    }
+  ngOnInit(): void {
+    this.loadPhysios();
+  }
+
+  loadPhysios(): void {
+    this.loadingPhysios = true;
+    this.userDataService.getUserPhysios().subscribe((response) => {
+      this.physios = response;
+      this.loadingPhysios = false;
+    });
   }
 
   crearFormularios(): void {
     this.signUpForm = this.formBuilder.group({
-      fisioterapeuta: ['', [Validators.required]],
+      physio: ['', [Validators.required]],
       nif: ['', [Validators.required]],
       name: ['', [Validators.required]],
       surname: ['', [Validators.required]],
@@ -93,7 +102,7 @@ export class LoginComponent implements OnInit {
     }
     this.loading = true;
     const {
-      fisioterapeuta,
+      physio,
       nif,
       name,
       surname,
@@ -102,18 +111,22 @@ export class LoginComponent implements OnInit {
       password,
     } = this.signUpForm.value;
     const userData: UserData = {
-      fisioterapeuta,
+      physio,
       nif,
       name,
       surname,
       phone,
       uid: '',
+      role: 'user',
     };
     const user = await this.authService.register(email, password, userData);
     if (user) {
       this.redirectAndDispatch();
     } else {
-      this.signUpError = { error: true, msg: 'Ya existe una cuenta asociada a este correo' };
+      this.signUpError = {
+        error: true,
+        msg: 'Ya existe una cuenta asociada a este correo',
+      };
     }
     this.loading = false;
   }
@@ -134,7 +147,7 @@ export class LoginComponent implements OnInit {
     setTimeout(() => {
       this.navbarService.dispathNavbar();
       this.router.navigate(['/home']);
-    }, 10);
+    }, 50);
   }
 
   closeLoginError(): void {
@@ -142,6 +155,6 @@ export class LoginComponent implements OnInit {
   }
 
   closeSignUpError(): void {
-    this.signUpError =  { ...this.signUpError, error: false };
+    this.signUpError = { ...this.signUpError, error: false };
   }
 }

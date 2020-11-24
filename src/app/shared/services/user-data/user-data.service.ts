@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFireDatabase } from '@angular/fire/database';
+import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { UserData } from '../../models/user-data.model';
 
@@ -17,7 +18,29 @@ export class UserDataService {
   getUserData(userId: string): Observable<any> {
     return this.realtimeDb
       .list('/userData', (ref) => ref.orderByChild('uid').equalTo(userId))
-      .valueChanges();
+      .snapshotChanges()
+      .pipe(
+        map((changes) =>
+          changes.map((c) => ({
+            key: c.payload.key,
+            ...(c as any).payload.val(),
+          }))
+        )
+      );
+  }
+
+  getUserPhysios(): Observable<any> {
+    return this.realtimeDb
+      .list('/userData', (ref) => ref.orderByChild('role').equalTo('physio'))
+      .snapshotChanges()
+      .pipe(
+        map((changes) =>
+          changes.map((c) => ({
+            key: c.payload.key,
+            ...(c as any).payload.val(),
+          }))
+        )
+      );
   }
 
   createUserData(userData: UserData): void {
@@ -25,18 +48,19 @@ export class UserDataService {
   }
 
   async updateUserData(
-    userId: string,
+    key: string,
     basicData: boolean,
+    field: string,
     value: string,
-    cb: any,
+    cb: any
   ): Promise<void> {
     if (basicData) {
       (await this.afAuth.currentUser).updateEmail(value).then(() => {
         cb();
       });
+    } else {
+      this.realtimeDb.list('/userData').update(key, { [field]: value });
+      cb();
     }
-    // this.realtimeDb
-    //   .list('/userData', (ref) => ref.orderByChild('uid').equalTo(userId))
-    //   .update(userData);
   }
 }

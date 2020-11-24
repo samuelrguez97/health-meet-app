@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { UserData } from 'src/app/shared/models/user-data.model';
 import { UserDataService } from '../../../shared/services/user-data/user-data.service';
-import { LoginComponent } from '../../../pages/login/login.component';
 import { NavbarService } from '../../../shared/services/navbar/navbar.service';
 
 @Component({
@@ -12,7 +11,9 @@ import { NavbarService } from '../../../shared/services/navbar/navbar.service';
   styleUrls: ['./side-nav.component.css'],
 })
 export class SideNavComponent implements OnInit {
-  user: any = null;
+  user: UserData = null;
+  userPhysio: string;
+
   show = false;
 
   public loadingLogOut = false;
@@ -23,27 +24,51 @@ export class SideNavComponent implements OnInit {
     private navbarService: NavbarService,
     private router: Router
   ) {
-    this.navbarService.navState$.subscribe(() => this.getUserData());
+    this.navbarService.navState$.subscribe(() => this.getCurrentUser());
   }
 
   async ngOnInit(): Promise<void> {
-    this.getUserData();
+    await this.getCurrentUser();
+  }
+
+  async getCurrentUser(): Promise<void> {
+    if (!this.user) {
+      await this.authService.getCurrentUser().then((response) => {
+        this.user = response;
+        this.getUserData();
+      });
+    } else {
+      this.getUserData();
+    }
   }
 
   async getUserData(): Promise<void> {
-    let user = await this.authService.getCurrentUser();
-    if (user && !this.show) { this.show = true; }
+    if (this.user && !this.show) {
+      this.show = true;
+    }
     let userData: UserData;
-    this.userDataService.getUserData(user.uid).subscribe((response) => {
+    this.userDataService.getUserData(this.user.uid).subscribe((response) => {
       userData = response[0];
-      user = {
-        ...user,
+      this.user = {
+        ...this.user,
         ...userData,
       };
-      if (user && userData) {
-        this.user = user;
-      }
+      this.getUserPhysio();
     });
+  }
+
+  async getUserPhysio(): Promise<void> {
+    if (this.user.role === 'user') {
+      this.userDataService
+        .getUserData(this.user.physio)
+        .subscribe((response) => {
+          if (response) {
+            this.userPhysio = response[0].name;
+          }
+        });
+    } else {
+      this.userPhysio = '-';
+    }
   }
 
   async logOut(): Promise<void> {
