@@ -9,7 +9,6 @@ import { Appointment } from 'src/app/shared/models/appointment.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 
 import { UserData } from 'src/app/shared/models/user-data.model';
 import { AuthService } from 'src/app/shared/services/auth/auth.service';
@@ -40,6 +39,8 @@ export class CalendarComponent implements OnInit {
   loading: boolean;
   sentAppointment: boolean;
   isMobile: boolean;
+
+  faCheckCircle = faCheckCircle;
 
   private userEvents = [];
   private otherEvents = [];
