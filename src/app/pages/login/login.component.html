@@ -10,13 +10,18 @@
                         <form autocomplete="off" [formGroup]="logInForm" (ngSubmit)="handleLogIn()">
                             <div class="form-group">
                                 <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" formControlName="email">
+                                <input type="email" class="form-control" id="email" formControlName="email" [class.is-invalid]="logInForm.controls.email.invalid && logInForm.controls.email.touched">
+                                <small class="fom-text text-danger" *ngIf="logInForm.controls.email.invalid && logInForm.controls.email.touched">Ingresa
+                                    un email válido</small>
                             </div>
                             <div class="form-group">
                                 <label for="password">Contraseña</label>
-                                <input type="password" class="form-control" id="password" formControlName="password">
+                                <input type="password" class="form-control" id="password" formControlName="password" [class.is-invalid]="logInForm.controls.password.invalid && logInForm.controls.password.touched">
+                                <small class="fom-text text-danger" *ngIf="logInForm.controls.password.invalid && logInForm.controls.password.touched">Debes
+                                    introducir una contraseña válida</small>
                             </div>
-                            <ngb-alert *ngIf="logInError.error" type="danger" (closed)="closeLoginError()">{{ logInError.msg }}</ngb-alert>
+                            <ngb-alert *ngIf="logInError.error" type="danger" (closed)="closeLoginError()">
+                                {{ logInError.msg }}</ngb-alert>
                             <button type="submit" class="btn btn-primary">Entrar</button>
                         </form>
                     </div>
@@ -79,8 +84,11 @@
                                                                     fisioterapeuta
                                                                     *</label>
                                                                 <select class="form-control" id="selectFisioterapeuta" formControlName="physio" [disabled]="loadingPhysios">
-                                                                    <option *ngFor="let physio of physios" [value]="physio.uid">{{ physio.name }}</option>
+                                                                    <option *ngFor="let physio of physios"
+                                                                        [value]="physio.uid">{{ physio.name }}</option>
                                                                 </select>
+                                                                <small class="fom-text text-danger" *ngIf="signUpForm.controls.physio.invalid && signUpForm.controls.physio.touched">Debes
+                                                                    seleccionar un/a fisioterapeuta</small>
                                                                 <small id="selectHelp" class="form-text text-muted">*
                                                                     Debe
                                                                     estar
@@ -93,44 +101,58 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="nif">DNI</label>
-                                                                <input class="form-control" id="nif" formControlName="nif">
+                                                                <input class="form-control" id="nif" formControlName="nif" [class.is-valid]="signUpForm.controls.nif.valid" [class.is-invalid]="signUpForm.controls.nif.invalid && signUpForm.controls.nif.touched">
+                                                                <small class="fom-text text-danger" *ngIf="signUpForm.controls.nif.invalid && signUpForm.controls.nif.touched">El
+                                                                    NIF es obligatorio y debe ser válido</small>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="name">Nombre</label>
-                                                                <input class="form-control" id="name" formControlName="name">
+                                                                <input class="form-control" id="name" formControlName="name" [class.is-valid]="signUpForm.controls.name.valid" [class.is-invalid]="signUpForm.controls.name.invalid && signUpForm.controls.name.touched">
+                                                                <small class="fom-text text-danger" *ngIf="signUpForm.controls.name.invalid && signUpForm.controls.name.touched">El
+                                                                    nombre es obligatorio y debe ser válido</small>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="surname">Apellidos</label>
-                                                                <input class="form-control" id="surname" formControlName="surname">
+                                                                <input class="form-control" id="surname" formControlName="surname" [class.is-valid]="signUpForm.controls.surname.valid" [class.is-invalid]="signUpForm.controls.surname.invalid && signUpForm.controls.surname.touched">
+                                                                <small class="fom-text text-danger" *ngIf="signUpForm.controls.surname.invalid && signUpForm.controls.surname.touched">Los
+                                                                    apellidos son obligatorios y deben ser
+                                                                    válidos</small>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="phone">Teléfono</label>
-                                                                <input class="form-control" id="phone" formControlName="phone">
+                                                                <input class="form-control" id="phone" formControlName="phone" [class.is-valid]="signUpForm.controls.phone.valid" [class.is-invalid]="signUpForm.controls.phone.invalid && signUpForm.controls.phone.touched">
+                                                                <small class="fom-text text-danger" *ngIf="signUpForm.controls.phone.invalid && signUpForm.controls.phone.touched">El
+                                                                    télfono es obligatorio y debe ser válido</small>
                                                             </div>
                                                         </div>
                                                     </ng-template>
                                                 </li>
-                                                <li [ngbNavItem]="2">
+                                                <li [ngbNavItem]="2" [disabled]="signUpForm.controls.nif.invalid || signUpForm.controls.name.invalid || signUpForm.controls.surname.invalid || signUpForm.controls.phone.invalid">
                                                     <a ngbNavLink>Datos de acceso</a>
                                                     <ng-template ngbNavContent>
                                                         <div class="mt-3">
                                                             <div class="form-group">
                                                                 <label for="email">Email</label>
-                                                                <input type="email" class="form-control" id="email" formControlName="email">
+                                                                <input type="email" class="form-control" id="email" formControlName="email" [class.is-valid]="signUpForm.controls.email.valid" [class.is-invalid]="signUpForm.controls.email.invalid && signUpForm.controls.email.touched">
+                                                                <small class="fom-text text-danger" *ngIf="signUpForm.controls.email.invalid && signUpForm.controls.email.touched">El
+                                                                    email es obligatorio y debe ser válido</small>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="password">Contraseña</label>
-                                                                <input type="password" class="form-control" id="password" formControlName="password">
+                                                                <input type="password" class="form-control" id="password" formControlName="password" [class.is-valid]="signUpForm.controls.password.valid" [class.is-invalid]="signUpForm.controls.password.invalid && signUpForm.controls.password.touched">
+                                                                <small class="fom-text text-danger" *ngIf="signUpForm.controls.password.invalid && signUpForm.controls.password.touched">La
+                                                                    contraseña es obligatoria y debe ser válida</small>
                                                             </div>
                                                         </div>
-                                                        <ngb-alert *ngIf="signUpError.error" type="danger" (closed)="closeSignUpError()">{{ signUpError.msg }}</ngb-alert>
+                                                        <ngb-alert *ngIf="signUpError.error" type="danger" (closed)="closeSignUpError()">{{ signUpError.msg }}
+                                                        </ngb-alert>
                                                     </ng-template>
                                                 </li>
                                             </ul>
 
                                             <div [ngbNavOutlet]="navSignUp" class="mt-2"></div>
 
-                                            <button type="submit" class="btn btn-primary">{{ activeSignUpForm === 1 ? 'Continuar' : 'Enviar' }}</button>
+                                            <button [disabled]="activeSignUpForm === 2 ? signUpForm.invalid : (signUpForm.controls.nif.invalid || signUpForm.controls.name.invalid || signUpForm.controls.surname.invalid || signUpForm.controls.phone.invalid)" type="submit" class="btn btn-primary">{{ activeSignUpForm === 1 ? 'Continuar' : 'Enviar' }}</button>
                                         </form>
                                     </div>
                                 </div>

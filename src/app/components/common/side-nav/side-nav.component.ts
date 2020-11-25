@@ -63,16 +63,16 @@ export class SideNavComponent implements OnInit {
   async getUserData(): Promise<void> {
     if (this.user && !this.show) {
       this.show = true;
+      let userData: UserData;
+      this.userDataService.getUserData(this.user.uid).subscribe((response) => {
+        userData = response[0];
+        this.user = {
+          ...this.user,
+          ...userData,
+        };
+        this.getUserPhysio();
+      });
     }
-    let userData: UserData;
-    this.userDataService.getUserData(this.user.uid).subscribe((response) => {
-      userData = response[0];
-      this.user = {
-        ...this.user,
-        ...userData,
-      };
-      this.getUserPhysio();
-    });
   }
 
   async getUserPhysio(): Promise<void> {

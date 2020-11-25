@@ -1,1 +1,68 @@
 <full-calendar #calendar [options]="calendarOptions" class="shadow rounded calendarBox"></full-calendar>
+
+<ng-template #appointmentModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Confirmar cita</h4>
+        <button type="button" class="close no-outline" aria-label="Close" (click)="modal.dismiss()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div *ngIf="loading; else form">
+            <div class="d-flex justify-content-center mt-4">
+                <div class="text-primary spinner-border" style="width: 16rem; height: 16rem;" role="status">
+                    <span class="sr-only">Cargando ...</span>
+                </div>
+            </div>
+        </div>
+        <div #form *ngIf="!sentAppointment; else sent">
+            <div class="m-3">
+                <div class="label mb-2">Hora inicio cita</div>
+                <div class="info">{{ currentAppointment.beginDate | date:'medium' }}</div>
+            </div>
+            <div class="m-3">
+                <div class="label mb-2">Hora fin cita</div>
+                <div class="info">{{ currentAppointment.endDate | date:'medium' }}</div>
+            </div>
+            <div class="separator mt-4 mb-4 w-100"></div>
+            <form autocomplete="off" [formGroup]="appointmentForm" (ngSubmit)="handleSubmit()">
+                <div class="form-group form-box rounded p-2">
+                    <div class="mt-3 mb-3 ml-2 mr-2">
+                        <div class="label mb-2">¿Vienes de un seguro?</div>
+                        <div class="form-check form-check-inline mr-4">
+                            <input type="radio" class="form-check-input info" name="type" value="seguro" formControlName="type" [class.is-invalid]="appointmentForm.controls.type.invalid && appointmentForm.controls.type.touched">
+                            <label class="info form-check-label">Sí</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input type="radio" class="form-check-input info" name="type" value="privado" formControlName="type" [class.is-invalid]="appointmentForm.controls.type.invalid && appointmentForm.controls.type.touched">
+                            <label class="info form-check-label">No</label>
+                        </div>
+                    </div>
+                    <div class="mt-3 mb-3 ml-2 mr-2">
+                        <label class="label mb-2" for="selectTherapy">Selecciona el tipo de terapia</label>
+                        <select class="form-control" id="selectTherapy" formControlName="therapy">
+                        <option value="indiba">Indiba</option>
+                        <option value="masaje">Masaje</option>
+                        <option value="tratamiento">Tratamiento reparador</option>
+                    </select>
+                    </div>
+                    <div class="mt-3 mb-3 ml-2 mr-2">
+                        <label class="label mb-2" for="pain">Describe brevemente tu dolencia</label>
+                        <textarea class="form-control" id="pain" name="pain" formControlName="pain" rows="3" cols="40"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button *ngIf="!sentAppointment" [disabled]="appointmentForm.invalid" type="button" class="btn btn-outline-primary" (click)="handleSubmit()">Enviar</button>
+        <button *ngIf="sentAppointment" type="button" class="btn btn-outline-primary" (click)="modal.close(); sentAppointment = false">Confirmar</button>
+    </div>
+</ng-template>
+
+<ng-template #sent>
+    <div class="w-100 text-center pt-5 pb-5">
+        <fa-icon class="doneIcon text-success" [icon]="faCheckCircle"></fa-icon>
+        <div class="doneText text-muted mt-5">¡Cita confirmada correctamente!</div>
+    </div>
+</ng-template>

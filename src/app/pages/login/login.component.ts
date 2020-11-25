@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
-  FormControl,
   FormGroup,
   Validators,
 } from '@angular/forms';
@@ -70,10 +69,22 @@ export class LoginComponent implements OnInit {
   crearFormularios(): void {
     this.signUpForm = this.formBuilder.group({
       physio: ['', [Validators.required]],
-      nif: ['', [Validators.required]],
-      name: ['', [Validators.required]],
-      surname: ['', [Validators.required]],
-      phone: ['', [Validators.required, Validators.minLength(9)]],
+      nif: [
+        '',
+        [Validators.required, Validators.pattern('[0-9]{8}[A-Z]{1}$')],
+      ],
+      name: [
+        '',
+        [Validators.required, Validators.pattern('[a-zA-Z0-9À-ÿ\u00f1\u00d1]{3,16}$')],
+      ],
+      surname: [
+        '',
+        [Validators.required, Validators.pattern('[a-zA-Z0-9À-ÿ\u00f1\u00d1]{3,30}$')],
+      ],
+      phone: [
+        '',
+        [Validators.required, Validators.pattern('[0-9]{9}$'), Validators.minLength(9)],
+      ],
       email: [
         '',
         [
@@ -81,7 +92,10 @@ export class LoginComponent implements OnInit {
           Validators.pattern('[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,3}$'),
         ],
       ],
-      password: ['', [Validators.required]],
+      password: [
+        '',
+        [Validators.required, Validators.pattern('[a-zA-Z0-9_-]{6,18}$')],
+      ],
     });
     this.logInForm = this.formBuilder.group({
       email: [
@@ -91,56 +105,81 @@ export class LoginComponent implements OnInit {
           Validators.pattern('[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,3}$'),
         ],
       ],
-      password: ['', [Validators.required]],
+      password: [
+        '',
+        [Validators.required, Validators.pattern('[a-zA-Z0-9_-]{6,18}$')],
+      ],
     });
   }
 
   async handleSubmit(): Promise<void> {
     if (this.activeSignUpForm === 1) {
-      this.activeSignUpForm = 2;
+      const { nif, name, surname, phone } = this.signUpForm.controls;
+      if (nif.valid && name.valid && surname.valid && phone.valid) {
+        this.activeSignUpForm = 2;
+      } else {
+        nif.markAsTouched();
+        name.markAsTouched();
+        surname.markAsTouched();
+        phone.markAsTouched();
+      }
       return;
-    }
-    this.loading = true;
-    const {
-      physio,
-      nif,
-      name,
-      surname,
-      phone,
-      email,
-      password,
-    } = this.signUpForm.value;
-    const userData: UserData = {
-      physio,
-      nif,
-      name,
-      surname,
-      phone,
-      uid: '',
-      role: 'user',
-    };
-    const user = await this.authService.register(email, password, userData);
-    if (user) {
-      this.redirectAndDispatch();
     } else {
-      this.signUpError = {
-        error: true,
-        msg: 'Ya existe una cuenta asociada a este correo',
-      };
+      const { email, password } = this.signUpForm.controls;
+      if (email.valid && password.valid) {
+        this.loading = true;
+        const {
+          physio,
+          nif,
+          name,
+          surname,
+          phone,
+          email,
+          password,
+        } = this.signUpForm.value;
+        const userData: UserData = {
+          physio,
+          nif,
+          name,
+          surname,
+          phone,
+          uid: '',
+          role: 'user',
+        };
+        const user = await this.authService.register(email, password, userData);
+        if (user) {
+          this.redirectAndDispatch();
+        } else {
+          this.signUpError = {
+            error: true,
+            msg: 'Ya existe una cuenta asociada a este correo',
+          };
+        }
+        this.loading = false;
+      } else {
+        email.markAsTouched();
+        password.markAsTouched();
+      }
     }
-    this.loading = false;
   }
 
   async handleLogIn(): Promise<void> {
     const { email, password } = this.logInForm.value;
-    this.loading = true;
-    const user = await this.authService.login(email, password);
-    if (user) {
-      this.redirectAndDispatch();
+    if (this.logInForm.valid) {
+      this.loading = true;
+      const user = await this.authService.login(email, password);
+      if (user) {
+        this.redirectAndDispatch();
+      } else {
+        this.logInError = {
+          error: true,
+          msg: 'Email o contraseña incorrectos',
+        };
+      }
+      this.loading = false;
     } else {
-      this.logInError = { error: true, msg: 'Email o contraseña incorrectos' };
+      this.logInForm.markAsTouched();
     }
-    this.loading = false;
   }
 
   redirectAndDispatch(): void {

@@ -1,15 +1,20 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
 
-import { ActivatedRoute } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { FullCalendarComponent, CalendarOptions } from '@fullcalendar/angular'; // useful for typechecking
 import esLocale from '@fullcalendar/core/locales/es';
 import { Appointment } from 'src/app/shared/models/appointment.model';
 
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+
 import { UserData } from 'src/app/shared/models/user-data.model';
 import { AuthService } from 'src/app/shared/services/auth/auth.service';
 import { UserDataService } from 'src/app/shared/services/user-data/user-data.service';
 import { AppointmentsService } from '../../shared/services/appointments/appointments.service';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'app-calendar',
@@ -18,12 +23,22 @@ import { AppointmentsService } from '../../shared/services/appointments/appointm
 })
 export class CalendarComponent implements OnInit {
   user: UserData;
+  faCheckCircle = faCheckCircle;
 
   private userEvents = [];
   private otherEvents = [];
 
+  appointmentForm: FormGroup;
+  currentAppointment: Appointment;
+
+  loading: boolean;
+  sentAppointment: boolean;
+
   // references the #calendar in the template
   @ViewChild('calendar') calendarComponent: FullCalendarComponent;
+
+  // references the #modal in the template
+  @ViewChild('appointmentModal') appointmentModal: NgTemplateOutlet;
 
   calendarOptions: CalendarOptions = {
     height: 480,
@@ -47,11 +62,23 @@ export class CalendarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private userDataService: UserDataService,
-    private appointmentService: AppointmentsService
-  ) {}
+    private appointmentService: AppointmentsService,
+    private modalService: NgbModal,
+    private formBuilder: FormBuilder
+  ) {
+    this.crearFormulario();
+  }
 
   async ngOnInit(): Promise<void> {
     await this.getCurrentUser();
+  }
+
+  crearFormulario(): void {
+    this.appointmentForm = this.formBuilder.group({
+      type: ['', [Validators.required]],
+      therapy: ['', [Validators.required]],
+      pain: ['', [Validators.required]],
+    });
   }
 
   getAppointments(): void {
@@ -155,8 +182,15 @@ export class CalendarComponent implements OnInit {
       beginDate: date.startStr,
       endDate: date.endStr,
       eventId: '_' + Math.random().toString(36).substr(2, 9),
+      type: null,
+      therapy: null,
+      pain: null,
     };
-    this.appointmentService.createAppointment(appointment);
+
+    this.currentAppointment = appointment;
+
+    // Abrir modal
+    this.open(this.appointmentModal);
   }
 
   handleEventClick(event: any): void {
@@ -168,5 +202,35 @@ export class CalendarComponent implements OnInit {
     ) {
       console.log('tu evento');
     }
+  }
+
+  open(content): void {
+    this.modalService
+      .open(content, { centered: true, ariaLabelledBy: 'modal-basic-title' })
+      .result.then((result) => {});
+  }
+
+  handleSubmit(): void {
+    if (this.appointmentForm.invalid) {
+      console.log('invalid');
+      this.appointmentForm.markAsTouched();
+      return;
+    }
+
+    const { type, therapy, pain } = this.appointmentForm.value;
+
+    this.loading = true;
+
+    this.currentAppointment = {
+      ...this.currentAppointment,
+      type,
+      therapy,
+      pain,
+    };
+
+    this.appointmentService.createAppointment(this.currentAppointment);
+    this.loading = false;
+    this.sentAppointment = true;
+    this.appointmentForm.reset();
   }
 }

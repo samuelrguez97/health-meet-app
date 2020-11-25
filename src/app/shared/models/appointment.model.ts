@@ -4,4 +4,7 @@ export interface Appointment {
     beginDate: string;
     endDate: string;
     eventId: string;
+    type: string;
+    therapy: string;
+    pain: string;
 }
