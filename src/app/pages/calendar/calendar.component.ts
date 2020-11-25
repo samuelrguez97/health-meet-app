@@ -24,6 +24,16 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
   styleUrls: ['./calendar.component.css'],
 })
 export class CalendarComponent implements OnInit {
+  constructor(
+    private authService: AuthService,
+    private userDataService: UserDataService,
+    private appointmentService: AppointmentsService,
+    private modalService: NgbModal,
+    private formBuilder: FormBuilder,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    this.crearFormulario();
+  }
   user: UserData;
   appointmentForm: FormGroup;
   currentAppointment: Appointment;
@@ -55,19 +65,15 @@ export class CalendarComponent implements OnInit {
     slotMaxTime: '20:30',
     validRange: {
       start: new Date(),
+      end: this.getEndDate(),
     },
     events: [...this.userEvents, ...this.otherEvents],
   };
 
-  constructor(
-    private authService: AuthService,
-    private userDataService: UserDataService,
-    private appointmentService: AppointmentsService,
-    private modalService: NgbModal,
-    private formBuilder: FormBuilder,
-    private breakpointObserver: BreakpointObserver
-  ) {
-    this.crearFormulario();
+  getEndDate(): Date {
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + 2);
+    return endDate;
   }
 
   async ngOnInit(): Promise<void> {
