@@ -9,12 +9,14 @@ import { Appointment } from 'src/app/shared/models/appointment.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 
 import { UserData } from 'src/app/shared/models/user-data.model';
 import { AuthService } from 'src/app/shared/services/auth/auth.service';
 import { UserDataService } from 'src/app/shared/services/user-data/user-data.service';
 import { AppointmentsService } from '../../shared/services/appointments/appointments.service';
 import { NgTemplateOutlet } from '@angular/common';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-calendar',
@@ -23,16 +25,14 @@ import { NgTemplateOutlet } from '@angular/common';
 })
 export class CalendarComponent implements OnInit {
   user: UserData;
-  faCheckCircle = faCheckCircle;
+  appointmentForm: FormGroup;
+  currentAppointment: Appointment;
+  loading: boolean;
+  sentAppointment: boolean;
+  isMobile: boolean;
 
   private userEvents = [];
   private otherEvents = [];
-
-  appointmentForm: FormGroup;
-  currentAppointment: Appointment;
-
-  loading: boolean;
-  sentAppointment: boolean;
 
   // references the #calendar in the template
   @ViewChild('calendar') calendarComponent: FullCalendarComponent;
@@ -64,13 +64,27 @@ export class CalendarComponent implements OnInit {
     private userDataService: UserDataService,
     private appointmentService: AppointmentsService,
     private modalService: NgbModal,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private breakpointObserver: BreakpointObserver
   ) {
     this.crearFormulario();
   }
 
   async ngOnInit(): Promise<void> {
     await this.getCurrentUser();
+    this.checkIfMobile();
+  }
+
+  checkIfMobile(): void {
+    this.breakpointObserver
+      .observe(['(min-width: 500px)'])
+      .subscribe((state: BreakpointState) => {
+        if (state.matches) {
+          this.isMobile = false;
+        } else {
+          this.isMobile = true;
+        }
+      });
   }
 
   crearFormulario(): void {

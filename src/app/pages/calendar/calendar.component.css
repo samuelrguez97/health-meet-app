@@ -9,6 +9,11 @@
     }
 }
 
+.buttonInfoMargin {
+    margin: 0 auto;
+    width: 184px;
+}
+
 .modal-title {
     font-size: 25px;
 }

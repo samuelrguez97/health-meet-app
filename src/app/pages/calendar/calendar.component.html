@@ -1,3 +1,13 @@
+<div [class.buttonInfoMargin]="isMobile" [class]="isMobile ? 'mb-5' : 'mb-4'">
+    <button type="button" class="btn btn-primary" [placement]="isMobile ? 'bottom' : 'right'" [ngbPopover]="isMobile ? popContentMobile : popContentDesktop">
+        ¿Cómo pedir una cita?
+    </button>
+</div>
+
+<ng-template #popContentDesktop>Para reservar una cita haz click sobre la hora inicial hasta que veas colorearse el recuadro, acto seguida desplaza el ratón y suelta el click en la hora fin de la cita.</ng-template>
+
+<ng-template #popContentMobile>Para reservar una cita haz tap sobre la hora inicial y mantenlo durante <b>un segundo</b> o hasta que veas colorearse el recuadro, acto seguido desliza el dedo hasta la hora final deseada.</ng-template>
+
 <full-calendar #calendar [options]="calendarOptions" class="shadow rounded calendarBox"></full-calendar>
 
 <ng-template #appointmentModal let-modal>
@@ -41,10 +51,10 @@
                     <div class="mt-3 mb-3 ml-2 mr-2">
                         <label class="label mb-2" for="selectTherapy">Selecciona el tipo de terapia</label>
                         <select class="form-control" id="selectTherapy" formControlName="therapy">
-                        <option value="indiba">Indiba</option>
-                        <option value="masaje">Masaje</option>
-                        <option value="tratamiento">Tratamiento reparador</option>
-                    </select>
+                            <option value="indiba">Indiba</option>
+                            <option value="masaje">Masaje</option>
+                            <option value="tratamiento">Tratamiento reparador</option>
+                        </select>
                     </div>
                     <div class="mt-3 mb-3 ml-2 mr-2">
                         <label class="label mb-2" for="pain">Describe brevemente tu dolencia</label>
