@@ -39,6 +39,7 @@ export class CalendarComponent implements OnInit {
   loading: boolean;
   sentAppointment: boolean;
   isMobile: boolean;
+  overlapError = false;
 
   faCheckCircle = faCheckCircle;
 
@@ -197,21 +198,51 @@ export class CalendarComponent implements OnInit {
   }
 
   handleDateClick(date: any): void {
-    const appointment: Appointment = {
-      userUid: this.user.uid,
-      physioUid: this.user.physio,
-      beginDate: date.startStr,
-      endDate: date.endStr,
-      eventId: '_' + Math.random().toString(36).substr(2, 9),
-      type: null,
-      therapy: null,
-      pain: null,
-    };
+    const dateStart = new Date(date.startStr);
+    const dateEnd = new Date(date.endStr);
 
-    this.currentAppointment = appointment;
+    if (!this.checkIfEventOverlaps(dateStart, dateEnd)) {
+      const appointment: Appointment = {
+        userUid: this.user.uid,
+        physioUid: this.user.physio,
+        beginDate: date.startStr,
+        endDate: date.endStr,
+        eventId: '_' + Math.random().toString(36).substr(2, 9),
+        type: null,
+        therapy: null,
+        pain: null,
+      };
 
-    // Abrir modal
-    this.open(this.appointmentModal);
+      this.currentAppointment = appointment;
+
+      // Abrir modal
+      this.open(this.appointmentModal);
+    } else {
+      this.overlapError = true;
+    }
+  }
+
+  closedToast(): void {
+    this.overlapError = false;
+  }
+
+  checkIfEventOverlaps(dateStart: Date, dateEnd: Date): boolean {
+    let overlaps = false;
+    this.userEvents.map((event) => {
+      const eventDateStart = new Date(event.start);
+      const eventDateEnd = new Date(event.end);
+      if (dateStart < eventDateStart && dateEnd >= eventDateEnd) {
+        overlaps = true;
+      }
+    });
+    this.otherEvents.map((event) => {
+      const eventDateStart = new Date(event.start);
+      const eventDateEnd = new Date(event.end);
+      if (dateStart < eventDateStart && dateEnd >= eventDateEnd) {
+        overlaps = true;
+      }
+    });
+    return overlaps;
   }
 
   handleEventClick(event: any): void {

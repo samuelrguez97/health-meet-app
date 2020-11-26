@@ -9,6 +9,24 @@
     }
 }
 
+.toast-box {
+    position: fixed;
+    width: 200px;
+    height: 150px;
+    left: 0;
+    right: 0;
+    top: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 1000;
+}
+
+.toast-box-body {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
 .buttonInfoMargin {
     margin: 0 auto;
     width: 184px;

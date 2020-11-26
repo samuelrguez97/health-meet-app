@@ -4,9 +4,15 @@
     </button>
 </div>
 
-<ng-template #popContentDesktop>Para reservar una cita haz click sobre la hora inicial hasta que veas colorearse el recuadro, acto seguida desplaza el ratón y suelta el click en la hora fin de la cita.</ng-template>
+<ng-template #popContentDesktop>Para reservar una cita haz click sobre la hora inicial hasta que veas colorearse el recuadro, acto seguido desplaza el ratón y suelta el click en la hora fin de la cita.</ng-template>
 
 <ng-template #popContentMobile>Para reservar una cita haz tap sobre la hora inicial y mantenlo durante <b>un segundo</b> o hasta que veas colorearse el recuadro, acto seguido desliza el dedo hasta la hora final deseada.</ng-template>
+
+<div class="toast-box">
+    <ngb-toast *ngIf="overlapError" class="toast-box-body bg-danger text-light" [autohide]="true" [delay]="3000" (hidden)="closedToast()">
+        No puedes seleccionar un rango donde ya haya una cita.
+    </ngb-toast>
+</div>
 
 <full-calendar #calendar [options]="calendarOptions" class="shadow rounded calendarBox"></full-calendar>
 
