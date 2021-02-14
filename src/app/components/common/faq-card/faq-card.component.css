@@ -1,0 +1,58 @@
+.faq-container {
+  margin: 10px 0;
+}
+
+button {
+  background-color: #f6f7f9;
+  width: 50px;
+  height: 50px;
+  border: 0;
+  font-size: 1.5em;
+  position: relative;
+}
+
+button span {
+  position: absolute;
+  transition: 300ms;
+  background: #007bff;
+  border-radius: 2px;
+}
+
+button:focus {
+  outline: 0;
+}
+
+/* Create the "+" shape by positioning the spans absolutely */
+button span:first-child {
+  top: 25%;
+  bottom: 25%;
+  width: 10%;
+  left: 45%;
+}
+
+button span:last-child {
+  left: 25%;
+  right: 25%;
+  height: 10%;
+  top: 45%;
+}
+
+/* Morph the shape when the button is hovered over */
+.button-active {
+  transform: rotate(90deg);
+}
+
+.button-active span:last-child {
+  left: 50%;
+  right: 50%;
+}
+
+.title-text {
+  font-size: 18px;
+  color: #41484e;
+}
+
+.text {
+  font-size: 15px;
+  color: #41484e;
+}

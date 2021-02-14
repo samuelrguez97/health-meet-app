@@ -1,0 +1,76 @@
+<div
+  *ngIf="!isMobile && myAppointments?.length > 0"
+  class="tableBox shadow rounded"
+>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Usuario</th>
+        <th scope="col">Fecha</th>
+        <th scope="col">Hora inicio</th>
+        <th scope="col">Hora fin</th>
+        <th scope="col">Tipo</th>
+        <th scope="col">Terapia</th>
+        <th scope="col">Descripción</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let appointment of myAppointments; index as i">
+        <th scope="row">{{ i + 1 }}</th>
+        <td>
+          {{ appointment.userNif }}
+        </td>
+        <td>{{ appointment.beginDate | date: "shortDate" }}</td>
+        <td>{{ appointment.beginDate | date: "shortTime" }}</td>
+        <td>{{ appointment.endDate | date: "shortTime" }}</td>
+        <td>{{ appointment.type }}</td>
+        <td>{{ appointment.therapy }}</td>
+        <td>{{ appointment.pain }}</td>
+        <td>
+          <button class="btn btn-primary btn-sm" (click)="editAppointment(i)">
+            Editar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="isMobile && myAppointments?.length > 0">
+  <div
+    *ngFor="let appointment of myAppointments; index as i"
+    class="appointmentMobileBox mb-3"
+  >
+    <div class="appointmentText">
+      <span class="appointmentLabel">Usuario:</span> {{ appointment.userNif }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Fecha:</span>
+      {{ appointment.beginDate | date: "shortDate" }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Hora inicio:</span>
+      {{ appointment.beginDate | date: "shortTime" }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Hora fin:</span>
+      {{ appointment.endDate | date: "shortTime" }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Tipo:</span> {{ appointment.type }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Terapia:</span> {{ appointment.therapy }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Descripción:</span> {{ appointment.pain }}
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-block btn-primary" (click)="editAppointment(i)">
+        Editar
+      </button>
+    </div>
+  </div>
+</div>

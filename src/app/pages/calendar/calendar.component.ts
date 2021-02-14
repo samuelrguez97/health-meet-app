@@ -16,6 +16,7 @@ import { UserDataService } from 'src/app/shared/services/user-data/user-data.ser
 import { AppointmentsService } from '../../shared/services/appointments/appointments.service';
 import { NgTemplateOutlet } from '@angular/common';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-calendar',
@@ -29,7 +30,8 @@ export class CalendarComponent implements OnInit {
     private appointmentService: AppointmentsService,
     private modalService: NgbModal,
     private formBuilder: FormBuilder,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private router: Router
   ) {
     this.crearFormulario();
   }
@@ -39,7 +41,7 @@ export class CalendarComponent implements OnInit {
   loading: boolean;
   sentAppointment: boolean;
   isMobile: boolean;
-  overlapError = false;
+  toastError = { show: false, msg: '' };
 
   faCheckCircle = faCheckCircle;
 
@@ -108,6 +110,7 @@ export class CalendarComponent implements OnInit {
     this.appointmentService
       .getAppointments(this.user.physio)
       .subscribe((response) => {
+        console.log('citas', response);
         if (response) {
           response.map((event) => {
             let newEvent: any = {
@@ -189,6 +192,9 @@ export class CalendarComponent implements OnInit {
     let userData: UserData;
     this.userDataService.getUserData(this.user.uid).subscribe((response) => {
       userData = response[0];
+      if (userData.role === 'physio') {
+        this.router.navigate(['appointments']);
+      }
       this.user = {
         ...this.user,
         ...userData,
@@ -198,32 +204,45 @@ export class CalendarComponent implements OnInit {
   }
 
   handleDateClick(date: any): void {
-    const dateStart = new Date(date.startStr);
-    const dateEnd = new Date(date.endStr);
+    if (this.user.role === 'user') {
+      const dateStart = new Date(date.startStr);
+      const dateEnd = new Date(date.endStr);
 
-    if (!this.checkIfEventOverlaps(dateStart, dateEnd)) {
-      const appointment: Appointment = {
-        userUid: this.user.uid,
-        physioUid: this.user.physio,
-        beginDate: date.startStr,
-        endDate: date.endStr,
-        eventId: '_' + Math.random().toString(36).substr(2, 9),
-        type: null,
-        therapy: null,
-        pain: null,
-      };
+      if (!this.checkIfEventOverlaps(dateStart, dateEnd)) {
+        const time = this.diffHours(dateEnd, dateStart);
+        if (time <= 1) {
+          const appointment: Appointment = {
+            userUid: this.user.uid,
+            physioUid: this.user.physio,
+            beginDate: date.startStr,
+            endDate: date.endStr,
+            eventId: '_' + Math.random().toString(36).substr(2, 9),
+            type: null,
+            therapy: null,
+            pain: null,
+          };
 
-      this.currentAppointment = appointment;
+          this.currentAppointment = appointment;
 
-      // Abrir modal
-      this.open(this.appointmentModal);
-    } else {
-      this.overlapError = true;
+          // Abrir modal
+          this.open(this.appointmentModal);
+        } else {
+          this.toastError = {
+            show: true,
+            msg: 'La cita puede durar como máximo 1 hora.',
+          };
+        }
+      } else {
+        this.toastError = {
+          show: true,
+          msg: 'No puedes seleccionar un rango donde ya haya una cita.',
+        };
+      }
     }
   }
 
   closedToast(): void {
-    this.overlapError = false;
+    this.toastError = { show: false, msg: '' };
   }
 
   checkIfEventOverlaps(dateStart: Date, dateEnd: Date): boolean {
@@ -243,6 +262,12 @@ export class CalendarComponent implements OnInit {
       }
     });
     return overlaps;
+  }
+
+  diffHours(dt2: Date, dt1: Date): number {
+    let diff = (dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= 60 * 60;
+    return diff;
   }
 
   handleEventClick(event: any): void {

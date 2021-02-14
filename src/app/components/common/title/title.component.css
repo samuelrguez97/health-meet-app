@@ -1,11 +1,8 @@
 .title h1 {
     font-size: 44px;
     font-weight: 800;
-    background: -webkit-linear-gradient(35deg, #007bff, #c2dfff 70%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     height: 100%;
+    color: #007bff;
     margin: 0;
     margin-left: 15px;
 }

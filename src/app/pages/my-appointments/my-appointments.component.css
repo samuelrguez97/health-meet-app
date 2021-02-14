@@ -1,0 +1,20 @@
+.tableBox {
+    background-color: white;
+}
+
+.appointmentMobileBox {
+    background-color: white;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: .25rem;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.05);
+}
+
+.appointmentLabel {
+    font-weight: 500;
+}
+
+.appointmentText {
+    font-weight: 300;
+    margin-bottom: .75px;
+}

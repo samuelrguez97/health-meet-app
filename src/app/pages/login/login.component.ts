@@ -1,9 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { Router } from '@angular/router';
 
@@ -21,10 +17,6 @@ import { UserDataService } from '../../shared/services/user-data/user-data.servi
 export class LoginComponent implements OnInit {
   public loading = false;
   public loadingPhysios = false;
-
-  public isWhatCollapsed = true;
-  public isHowCollapsed = true;
-  public isBeginCollapsed = true;
 
   public activeLogIn = 1;
   public activeSignUpForm = 1;
@@ -69,21 +61,28 @@ export class LoginComponent implements OnInit {
   crearFormularios(): void {
     this.signUpForm = this.formBuilder.group({
       physio: ['', [Validators.required]],
-      nif: [
-        '',
-        [Validators.required, Validators.pattern('[0-9]{8}[A-Z]{1}$')],
-      ],
+      nif: ['', [Validators.required, Validators.pattern('[0-9]{8}[A-Z]{1}$')]],
       name: [
         '',
-        [Validators.required, Validators.pattern('[a-zA-Z0-9À-ÿ\u00f1\u00d1]{3,16}$')],
+        [
+          Validators.required,
+          Validators.pattern('[a-zA-Z0-9À-ÿ\u00f1\u00d1]{3,16}$'),
+        ],
       ],
       surname: [
         '',
-        [Validators.required, Validators.pattern('[a-zA-Z0-9À-ÿ\u00f1\u00d1]{3,30}$')],
+        [
+          Validators.required,
+          Validators.pattern('[a-zA-Z0-9À-ÿ\u00f1\u00d1]{3,30}$'),
+        ],
       ],
       phone: [
         '',
-        [Validators.required, Validators.pattern('[0-9]{9}$'), Validators.minLength(9)],
+        [
+          Validators.required,
+          Validators.pattern('[0-9]{9}$'),
+          Validators.minLength(9),
+        ],
       ],
       email: [
         '',
@@ -143,12 +142,11 @@ export class LoginComponent implements OnInit {
           name,
           surname,
           phone,
-          uid: '',
           role: 'user',
         };
         const user = await this.authService.register(email, password, userData);
         if (user) {
-          this.redirectAndDispatch();
+          this.redirectAndDispatch(userData);
         } else {
           this.signUpError = {
             error: true,
@@ -165,27 +163,35 @@ export class LoginComponent implements OnInit {
 
   async handleLogIn(): Promise<void> {
     const { email, password } = this.logInForm.value;
-    if (this.logInForm.valid) {
-      this.loading = true;
-      const user = await this.authService.login(email, password);
-      if (user) {
-        this.redirectAndDispatch();
-      } else {
-        this.logInError = {
-          error: true,
-          msg: 'Email o contraseña incorrectos',
-        };
-      }
-      this.loading = false;
-    } else {
+
+    if (!this.logInForm.valid) {
       this.logInForm.markAsTouched();
+      return;
+    }
+
+    this.loading = true;
+    const login = await this.authService.login(email, password);
+    if (login) {
+      this.userDataService.getUserData(login.user.uid).subscribe((response) => {
+        const userData = response[0];
+        this.redirectAndDispatch(userData);
+      });
+    } else {
+      this.logInError = {
+        error: true,
+        msg: 'Email o contraseña incorrectos',
+      };
+      this.loading = false;
     }
   }
 
-  redirectAndDispatch(): void {
+  redirectAndDispatch(user: UserData): void {
     setTimeout(() => {
+      this.loading = false;
       this.navbarService.dispathNavbar();
-      this.router.navigate(['/home']);
+      this.router.navigate([
+        `${user.role === 'user' ? '/home' : '/appointments'}`,
+      ]);
     }, 50);
   }
 

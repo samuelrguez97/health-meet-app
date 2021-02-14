@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { UserData } from '../../models/user-data.model';
+import { User } from '../../models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -49,18 +50,19 @@ export class UserDataService {
 
   async updateUserData(
     key: string,
-    basicData: boolean,
     field: string,
     value: string,
-    cb: any
+    cb: Function
   ): Promise<void> {
-    if (basicData) {
-      (await this.afAuth.currentUser).updateEmail(value).then(() => {
-        cb();
-      });
-    } else {
-      this.realtimeDb.list('/userData').update(key, { [field]: value });
-      cb();
-    }
+    this.realtimeDb.list('/userData').update(key, { [field]: value });
+    cb();
+  }
+
+  async deleteUserData(uid: string): Promise<any> {
+    return await this.getUserData(uid).subscribe((list) =>
+      list.forEach((userData) => {
+        this.realtimeDb.object(`/userData/${userData.key}`).remove();
+      })
+    );
   }
 }

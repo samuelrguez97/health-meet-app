@@ -1,20 +1,12 @@
-<div [class.buttonInfoMargin]="isMobile" [class]="isMobile ? 'mb-5' : 'mb-4'">
-    <button type="button" class="btn btn-primary" [placement]="isMobile ? 'bottom' : 'right'" [ngbPopover]="isMobile ? popContentMobile : popContentDesktop">
-        ¿Cómo pedir una cita?
-    </button>
-</div>
-
-<ng-template #popContentDesktop>Para reservar una cita haz click sobre la hora inicial hasta que veas colorearse el recuadro, acto seguido desplaza el ratón y suelta el click en la hora fin de la cita.</ng-template>
-
-<ng-template #popContentMobile>Para reservar una cita haz tap sobre la hora inicial y mantenlo durante <b>un segundo</b> o hasta que veas colorearse el recuadro, acto seguido desliza el dedo hasta la hora final deseada.</ng-template>
-
-<div class="toast-box">
-    <ngb-toast *ngIf="overlapError" class="toast-box-body bg-danger text-light" [autohide]="true" [delay]="3000" (hidden)="closedToast()">
-        No puedes seleccionar un rango donde ya haya una cita.
+<div *ngIf="toastError?.show" class="toast-box">
+    <ngb-toast class="toast-box-body bg-danger text-light" [autohide]="true" [delay]="3000" (hidden)="closedToast()">
+        {{ toastError?.msg }}
     </ngb-toast>
 </div>
 
-<full-calendar #calendar [options]="calendarOptions" class="shadow rounded calendarBox"></full-calendar>
+<full-calendar #calendar [options]="calendarOptions" class="shadow rounded calendarBox">
+</full-calendar>
+
 
 <ng-template #appointmentModal let-modal>
     <div class="modal-header">

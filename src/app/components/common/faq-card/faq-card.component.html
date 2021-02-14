@@ -1,0 +1,21 @@
+<div class="faq-container">
+  <div class="faq-title d-flex align-items-center">
+    <div class="faq-title-button mr-2">
+      <button
+        (click)="toggle(); collapse.toggle()"
+        [class.button-active]="opened"
+      >
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <span class="title-text">{{ title }}</span>
+  </div>
+  <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+    <div class="card">
+      <div class="card-body">
+        <span class="text">{{ text }}</span>
+      </div>
+    </div>
+  </div>
+</div>

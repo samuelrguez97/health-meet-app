@@ -68,4 +68,33 @@ export class AuthService {
       console.log(`Error en el getCurrentUser: ${error}`);
     }
   }
+
+  async updateUser(
+    email: string,
+    password: string,
+    value: string,
+    cb: Function
+  ): Promise<any> {
+    return await this.afAuth
+      .signInWithEmailAndPassword(email, password)
+      .then(async () => {
+        (await this.afAuth.currentUser).updateEmail(value).then(() => {
+          cb();
+        });
+      })
+      .catch((error) => cb(error));
+  }
+
+  async deleteUser(email: string, password: string): Promise<any> {
+    try {
+      return await this.afAuth
+        .signInWithEmailAndPassword(email, password)
+        .then(async () => {
+          const userToDelete = await this.afAuth.currentUser;
+          userToDelete.delete();
+        });
+    } catch (error) {
+      console.log(`Error en el deleteUser: ${error}`);
+    }
+  }
 }

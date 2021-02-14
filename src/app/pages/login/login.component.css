@@ -1,17 +1,43 @@
 .home-card {
-    width: 100%;
-    height: auto;
-    border-radius: 15px;
-    border: .1px solid #dadce9;
-    box-shadow: 0px 0px 15px 0px #dadce9;
-    padding: 15px;
-    background-color: #ffff;
+  width: 100%;
+  height: auto;
+  border-radius: 15px;
+  border: 0.1px solid #dadce9;
+  box-shadow: 0px 0px 15px 0px #dadce9;
+  padding: 15px;
+  background-color: #ffff;
+}
+
+.info-box {
+  margin-bottom: 15px;
+}
+
+.arrow {
+  color: #007bff;
+  font-size: 50px;
+}
+
+.info-title {
+  color: #007bff;
+  font-size: 23px;
+}
+.info-text {
+  padding-left: 50px;
+  font-size: 17px;
+}
+
+.nav-link {
+  font-size: 15px;
 }
 
 .card-body {
-    font-size: 16px;
+  font-size: 16px;
+}
+
+.login-form-container {
+  font-size: 16px;
 }
 
 .info {
-    font-size: 12px;
+  font-size: 12px;
 }

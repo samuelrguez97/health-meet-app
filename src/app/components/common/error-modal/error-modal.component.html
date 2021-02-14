@@ -1,0 +1,22 @@
+<div class="modal-header">
+  <h4 class="modal-title">Se ha producido un error</h4>
+  <button
+    type="button"
+    class="close"
+    aria-label="Close"
+    (click)="activeModal.dismiss('Cross click')"
+  >
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">Se produjo un error: {{ error }}</div>
+
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-outline-dark"
+    (click)="activeModal.dismiss('Cross click')"
+  >
+    Cerrar
+  </button>
+</div>

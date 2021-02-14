@@ -23,11 +23,17 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { MyAppointmentsComponent } from './pages/my-appointments/my-appointments.component';
+import { FaqComponent } from './pages/faq/faq.component';
+import { FaqCardComponent } from './components/common/faq-card/faq-card.component';
+import { PasswordModalComponent } from './components/common/password-modal/password-modal.component';
+import { ErrorModalComponent } from './components/common/error-modal/error-modal.component';
+import { DeleteUserModalComponent } from './components/common/delete-user-modal/delete-user-modal.component';
 
 FullCalendarModule.registerPlugins([
   dayGridPlugin,
   timeGridPlugin,
-  interactionPlugin
+  interactionPlugin,
 ]);
 
 @NgModule({
@@ -39,6 +45,12 @@ FullCalendarModule.registerPlugins([
     SideNavComponent,
     CalendarComponent,
     ProfileComponent,
+    MyAppointmentsComponent,
+    FaqComponent,
+    FaqCardComponent,
+    PasswordModalComponent,
+    ErrorModalComponent,
+    DeleteUserModalComponent,
   ],
   imports: [
     BrowserModule,
