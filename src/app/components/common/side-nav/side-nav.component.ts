@@ -28,10 +28,12 @@ export class SideNavComponent implements OnInit {
     private userDataService: UserDataService,
     private navbarService: NavbarService,
     private router: Router,
-    private utils: Utils,
+    private utils: Utils
   ) {
     this.navbarService.navState$.subscribe(() => this.getCurrentUser());
-    this.utils.checkIfMobile().subscribe((state: BreakpointState) => this.checkIfMobileCallback(state))
+    this.utils
+      .checkIfMobile()
+      .subscribe((state: BreakpointState) => this.checkIfMobileCallback(state));
   }
 
   async ngOnInit(): Promise<void> {
@@ -40,6 +42,9 @@ export class SideNavComponent implements OnInit {
 
   checkIfMobileCallback(state: BreakpointState): void {
     this.isMobile = !state.matches;
+    if (this.showMenuMobile) {
+      this.toggleMenu();
+    }
   }
 
   async getCurrentUser(): Promise<void> {

@@ -110,7 +110,6 @@ export class CalendarComponent implements OnInit {
     this.appointmentService
       .getAppointments(this.user.physio)
       .subscribe((response) => {
-        console.log('citas', response);
         if (response) {
           response.map((event) => {
             let newEvent: any = {
@@ -136,7 +135,6 @@ export class CalendarComponent implements OnInit {
               if (event.userUid === this.user.uid) {
                 newEvent = {
                   ...newEvent,
-                  title: 'Cita',
                   extendedProps: {
                     ...newEvent.extendedProps,
                     userId: this.user.uid,
@@ -247,14 +245,14 @@ export class CalendarComponent implements OnInit {
 
   checkIfEventOverlaps(dateStart: Date, dateEnd: Date): boolean {
     let overlaps = false;
-    this.userEvents.map((event) => {
+    this.userEvents.forEach((event) => {
       const eventDateStart = new Date(event.start);
       const eventDateEnd = new Date(event.end);
       if (dateStart < eventDateStart && dateEnd >= eventDateEnd) {
         overlaps = true;
       }
     });
-    this.otherEvents.map((event) => {
+    this.otherEvents.forEach((event) => {
       const eventDateStart = new Date(event.start);
       const eventDateEnd = new Date(event.end);
       if (dateStart < eventDateStart && dateEnd >= eventDateEnd) {

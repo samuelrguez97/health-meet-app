@@ -74,3 +74,117 @@
     </div>
   </div>
 </div>
+
+<ng-template #appointmentModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Editar cita</h4>
+    <button
+      type="button"
+      class="close no-outline"
+      aria-label="Close"
+      (click)="modal.dismiss()"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div *ngIf="loading">
+      <div class="d-flex justify-content-center mt-4">
+        <div
+          class="text-primary spinner-border"
+          style="width: 16rem; height: 16rem"
+          role="status"
+        >
+          <span class="sr-only">Cargando ...</span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="!sentAppointment">
+      <div class="m-3 justify-content-center">
+        <div class="label mb-2">Fecha de la cita</div>
+        <div class="info">
+          <form class="form-inline">
+            <div class="form-group">
+              <div class="input-group">
+                <input
+                  class="form-control"
+                  placeholder="yyyy-mm-dd"
+                  name="dpB"
+                  [(ngModel)]="date"
+                  [minDate]="minDateNgb"
+                  [maxDate]="maxDateNgb"
+                  [markDisabled]="isDisabled"
+                  ngbDatepicker
+                  #dB="ngbDatepicker"
+                />
+                <div class="input-group-append">
+                  <button
+                    class="btn btn-outline-primary date-button"
+                    (click)="dB.toggle()"
+                    type="button"
+                  >
+                    <span class="material-icons date-button-icon">
+                      date_range
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="separator mt-4 mb-4 w-100"></div>
+      <div class="mt-4 m-3 d-flex">
+        <div class="mr-5">
+          <div class="label mb-2">Hora inicio cita</div>
+          <div class="info">
+            <ngb-timepicker
+              [(ngModel)]="beginTime"
+              [spinners]="false"
+            ></ngb-timepicker>
+          </div>
+        </div>
+        <div>
+          <div class="label mb-2">Hora fin cita</div>
+          <div class="info">
+            <ngb-timepicker
+              [(ngModel)]="endTime"
+              [spinners]="false"
+            ></ngb-timepicker>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="error.flag" class="m-3">
+        <ngb-alert type="danger" (closed)="closeAlert()">{{
+          error.msg
+        }}</ngb-alert>
+      </div>
+    </div>
+    <div *ngIf="sentAppointment">
+      <div class="w-100 text-center pt-5 pb-5">
+        <fa-icon class="doneIcon text-success" [icon]="faCheckCircle"></fa-icon>
+        <div class="doneText text-muted mt-5">
+          ¡Cita confirmada correctamente!
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button
+      *ngIf="!sentAppointment"
+      type="button"
+      class="btn btn-outline-primary"
+      (click)="handleEdit()"
+    >
+      Confirmar
+    </button>
+    <button
+      *ngIf="sentAppointment"
+      type="button"
+      class="btn btn-outline-primary"
+      (click)="modal.close()"
+    >
+      Confirmar
+    </button>
+  </div>
+</ng-template>

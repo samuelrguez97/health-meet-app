@@ -1,20 +1,68 @@
 .tableBox {
-    background-color: white;
+  background-color: white;
 }
 
 .appointmentMobileBox {
-    background-color: white;
-    padding: 12px;
-    font-size: 15px;
-    border-radius: .25rem;
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.05);
+  background-color: white;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
 }
 
 .appointmentLabel {
-    font-weight: 500;
+  font-weight: 500;
 }
 
 .appointmentText {
-    font-weight: 300;
-    margin-bottom: .75px;
+  font-weight: 300;
+  margin-bottom: 0.75px;
+}
+
+.modal-title {
+  font-size: 25px;
+}
+
+.no-outline {
+  outline: none;
+}
+
+.separator {
+  height: 1px;
+  background-color: #007bff33;
+}
+
+.form-box {
+  border: 0.5px solid #dee2e6;
+}
+
+.label {
+  font-size: 18px;
+  color: #007bff;
+}
+
+.info {
+  font-size: 16px;
+}
+
+.doneIcon {
+  font-size: 200px;
+}
+
+.doneText {
+  font-size: 30px;
+}
+
+.date-button {
+  width: 40px;
+}
+
+.date-button-icon {
+  position: absolute;
+  top: 5px;
+  left: 7px;
+}
+
+.error {
+  color: rgb(223, 7, 7);
 }
