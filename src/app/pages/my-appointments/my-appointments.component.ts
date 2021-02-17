@@ -69,11 +69,12 @@ export class MyAppointmentsComponent implements OnInit {
   /* */
 
   /* Búsqueda */
-  types: string[] = ['seguro', 'privado'];
+  filterOn: boolean = false;
+  types: string[] = ['todos', 'seguro', 'privado'];
 
-  busquedaNif: string = '';
+  busquedaNombre: string = '';
   busquedaTipo: string = this.types[0];
-  busquedaHoy: boolean = false;
+  busquedaDia: any;
   /* */
 
   currentPage = this.page;
@@ -355,26 +356,39 @@ export class MyAppointmentsComponent implements OnInit {
   }
 
   async getAppointmentsByCriteria(
-    userNif: string,
+    userName: string,
     type: string,
-    fromToday?: boolean
+    dia: string
   ): Promise<void> {
     const response = await this.appointmentService.getAppointmentsByCriteria(
       this.user.uid,
-      userNif,
+      userName,
       type,
-      fromToday
+      dia
     );
+    this.page = 1;
     this.setAppointments(response);
-    console.log(response);
+    this.setAppointmentsLength(response.length);
   }
 
   getAppointmentsFilter(): void {
+    this.filterOn = true;
+    const busquedaDiaAux = this.busquedaDia
+      ? `${this.busquedaDia.day}-${this.busquedaDia.month}-${this.busquedaDia.year}`
+      : '';
     this.getAppointmentsByCriteria(
-      this.busquedaNif,
+      this.busquedaNombre,
       this.busquedaTipo,
-      this.busquedaHoy
+      busquedaDiaAux
     );
+  }
+
+  resetAppointments(): void {
+    this.filterOn = false;
+    this.getAppointments();
+    this.appointmentService
+      .getCurrentAppointmentsLength()
+      .then((res) => this.setAppointmentsLength(res));
   }
 
   refreshAppointments(): void {

@@ -233,6 +233,7 @@ export class CalendarComponent implements OnInit {
           if (time <= 1) {
             const appointment: Appointment = {
               userNif: this.user.nif,
+              userName: `${this.user.name} ${this.user.surname}`,
               userUid: this.user.uid,
               physioUid: this.user.physio,
               date: this.utils.getDateFormatted(dateStart),

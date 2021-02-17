@@ -12,7 +12,7 @@ import Utils from 'src/app/utils/Utils';
   providedIn: 'root',
 })
 export class AppointmentsService {
-  constructor(private realtimeDb: AngularFireDatabase, private utils: Utils) {}
+  constructor(private realtimeDb: AngularFireDatabase) {}
 
   getUserAppointments(uid: string): Observable<any> {
     return this.realtimeDb
@@ -46,9 +46,9 @@ export class AppointmentsService {
 
   async getAppointmentsByCriteria(
     physioUid: string,
-    userNif: string,
+    userName: string,
     type: string,
-    fromToday: boolean
+    dia: string
   ): Promise<any> {
     const today = new Date();
     return new Promise((resolve) => {
@@ -57,24 +57,25 @@ export class AppointmentsService {
           '/appointments',
           (ref) =>
             ref.orderByChild('physioUid').equalTo(physioUid) &&
-            (fromToday
-              ? ref
-                  .orderByChild('date')
-                  .equalTo(this.utils.getDateFormatted(today))
-              : ref)
+            (dia ? ref.orderByChild('date').equalTo(dia) : ref)
         )
         .snapshotChanges()
         .pipe(
           map((changes) =>
             changes
               .filter((c) =>
-                userNif
-                  ? (c as any).payload.val().userNif === userNif
+                userName
+                  ? (c as any).payload
+                      .val()
+                      .userName?.toLowerCase()
+                      .includes(userName.toLowerCase())
                   : (c as any).payload.val()
               )
               .filter((c) =>
                 type
-                  ? (c as any).payload.val().type === type
+                  ? type === 'todos'
+                    ? (c as any).payload.val()
+                    : (c as any).payload.val().type === type
                   : (c as any).payload.val()
               )
               .map((c) => ({
@@ -94,6 +95,16 @@ export class AppointmentsService {
       .object(`/appointments/length`)
       .snapshotChanges()
       .pipe(map((c) => (c as any).payload.val()));
+  }
+
+  async getCurrentAppointmentsLength(): Promise<any> {
+    return new Promise((resolve) =>
+      this.realtimeDb
+        .object(`/appointments/length`)
+        .snapshotChanges()
+        .pipe(map((c) => (c as any).payload.val()))
+        .subscribe((response) => resolve(response))
+    ).then((res) => res);
   }
 
   createAppointment(appointment: Appointment, currentLenght: number): void {

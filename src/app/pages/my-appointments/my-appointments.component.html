@@ -16,13 +16,13 @@
       class="filter-row col-12 col-lg-5 col-xl-3 p-2 d-flex align-items-center"
     >
       <div class="filter-separator mr-3"></div>
-      <div class="mr-2">Búsqueda por nif</div>
+      <div class="mr-2">Búsqueda por nombre</div>
       <div>
         <input
           type="text"
           class="form-control"
-          id="nif"
-          [(ngModel)]="busquedaNif"
+          id="nombre"
+          [(ngModel)]="busquedaNombre"
         />
       </div>
     </div>
@@ -44,32 +44,42 @@
       </div>
     </div>
     <div
-      class="filter-row col-12 col-lg-3 col-xl-2 p-2 d-flex align-items-center"
+      class="filter-row col-9 col-md-6 col-lg-5 col-xl-4 p-2 d-flex align-items-center"
     >
       <div class="filter-separator mr-3"></div>
-      <div class="form-check">
+      <div class="mr-2">Búsqueda por día</div>
+      <div class="input-group">
         <input
-          class="form-check-input"
-          type="checkbox"
-          id="busquedaHoy"
-          [(ngModel)]="busquedaHoy"
+          class="form-control"
+          name="busquedaDia"
+          [(ngModel)]="busquedaDia"
+          ngbDatepicker
+          #dB="ngbDatepicker"
         />
-        <label class="form-check-label" for="busquedaHoy">
-          Citas para hoy
-        </label>
+        <div class="input-group-append">
+          <button
+            class="btn btn-outline-primary date-button"
+            (click)="dB.toggle()"
+            type="button"
+          >
+            <span class="material-icons date-button-icon"> date_range </span>
+          </button>
+        </div>
       </div>
     </div>
-    <div
-      class="filter-row col-12 col-lg-6 col-xl-4 p-2 d-flex align-items-center"
-    >
+    <div class="filter-row col-12 col-xl-2 p-2 d-flex align-items-center">
       <div class="d-flex justify-content-end w-100">
-        <div class="mr-2">
-          <button class="btn btn-info" (click)="getAppointmentsFilter()">
+        <div *ngIf="!filterOn">
+          <button
+            class="btn btn-info"
+            (click)="getAppointmentsFilter()"
+            (keyup.enter)="getAppointmentsFilter()"
+          >
             Aplicar filtros
           </button>
         </div>
-        <div>
-          <button class="btn btn-outline-info" (click)="getAppointments()">
+        <div *ngIf="filterOn">
+          <button class="btn btn-outline-info" (click)="resetAppointments()">
             Limpiar filtros
           </button>
         </div>
@@ -92,7 +102,8 @@
     <thead>
       <tr>
         <th scope="col">#</th>
-        <th scope="col">Usuario</th>
+        <th scope="col">Nif</th>
+        <th scope="col">Nombre</th>
         <th scope="col">Fecha</th>
         <th scope="col">Hora inicio</th>
         <th scope="col">Hora fin</th>
@@ -107,6 +118,9 @@
         <th scope="row">{{ i + 1 }}</th>
         <td>
           {{ appointment.userNif }}
+        </td>
+        <td>
+          {{ appointment.userName }}
         </td>
         <td>{{ appointment.beginDate | date: "shortDate" }}</td>
         <td>{{ appointment.beginDate | date: "shortTime" }}</td>
@@ -147,7 +161,10 @@
     class="appointmentMobileBox mb-3"
   >
     <div class="appointmentText">
-      <span class="appointmentLabel">Usuario:</span> {{ appointment.userNif }}
+      <span class="appointmentLabel">Nif:</span> {{ appointment.userNif }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Nombre:</span> {{ appointment.userName }}
     </div>
     <div class="appointmentText">
       <span class="appointmentLabel">Fecha:</span>
@@ -240,7 +257,7 @@
               <div class="input-group">
                 <input
                   class="form-control"
-                  placeholder="yyyy-mm-dd"
+                  placeholder="dd-mm-yyyy"
                   name="dpB"
                   [(ngModel)]="date"
                   [minDate]="minDateNgb"

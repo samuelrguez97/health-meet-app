@@ -2,6 +2,7 @@ export interface Appointment {
   key?: string;
   userUid: string;
   userNif?: string;
+  userName?: string;
   physioUid: string;
   date: string;
   beginDate: string;
