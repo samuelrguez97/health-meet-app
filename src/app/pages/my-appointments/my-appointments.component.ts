@@ -46,17 +46,37 @@ export class MyAppointmentsComponent implements OnInit {
     this.utils
       .checkIfMobile()
       .subscribe((state: BreakpointState) => this.checkIfMobileCallback(state));
+    this.appointmentService
+      .getAppointmentsLength()
+      .subscribe((response) => this.setAppointmentsLength(response));
   }
 
-  loading: boolean = false;
+  loading: boolean = true;
   faCheckCircle = faCheckCircle;
 
   user: User;
   myAppointments: Appointment[] = [];
+  myAppointmentsComplete: Appointment[] = [];
   currentAppointment: Appointment;
   sentAppointment: boolean = false;
 
   error: any = { flag: false, msg: '' };
+
+  /* Appointments pagination */
+  page = 1;
+  pageSize = 5;
+  collectionSize = 0;
+  /* */
+
+  /* Búsqueda */
+  types: string[] = ['seguro', 'privado'];
+
+  busquedaNif: string = '';
+  busquedaTipo: string = this.types[0];
+  busquedaHoy: boolean = false;
+  /* */
+
+  currentPage = this.page;
 
   date: NgbDateStruct;
   beginTime: any;
@@ -79,36 +99,42 @@ export class MyAppointmentsComponent implements OnInit {
   isMobile: boolean = false;
 
   @ViewChild('appointmentModal') appointmentModal: NgTemplateOutlet;
+  @ViewChild('deleteAppointmentModal') deleteAppointmentModal: NgTemplateOutlet;
 
   async ngOnInit(): Promise<void> {
     await this.getCurrentUser();
+    this.getAppointments();
+  }
+
+  getAppointments() {
+    this.appointmentService
+      .getAppointments(this.user.uid)
+      .subscribe((response: Appointment[]) => this.setAppointments(response));
   }
 
   async getCurrentUser(): Promise<void> {
     if (!this.user) {
-      await this.authService.getCurrentUser().then((response) => {
+      await this.authService.getCurrentUser().then(async (response) => {
         this.user = response;
-        this.getAppointments();
       });
     }
   }
 
-  getAppointments(): void {
-    this.appointmentService
-      .getAppointments(this.user.uid)
-      .subscribe((response) => {
-        if (response && response.length > 0) {
-          this.clearMyAppointments();
-          response.map((appointment) => {
-            this.getUserData(appointment.userUid).subscribe((userData) => {
-              if (userData) {
-                appointment = { ...appointment, userNif: userData[0].nif };
-                this.myAppointments.push(appointment);
-              }
-            });
-          });
-        }
-      });
+  setAppointmentsLength(response: any): void {
+    this.collectionSize = response;
+  }
+
+  setAppointments(response: Appointment[]): void {
+    this.clearMyAppointments();
+    if (response && response.length > 0) {
+      response
+        .sort((a: any, b: any) => a.beginDate.localeCompare(b.beginDate))
+        .forEach((appointment) => {
+          this.myAppointmentsComplete.push(appointment);
+        });
+    }
+    this.refreshAppointments();
+    this.loading = false;
   }
 
   getUserData(userUid: string): Observable<UserData> {
@@ -120,7 +146,7 @@ export class MyAppointmentsComponent implements OnInit {
   }
 
   clearMyAppointments(): void {
-    this.myAppointments = [];
+    this.myAppointmentsComplete = [];
   }
 
   editAppointment(index: number): void {
@@ -143,7 +169,12 @@ export class MyAppointmentsComponent implements OnInit {
       minute: endDate.getMinutes(),
     };
 
-    this.open(this.appointmentModal);
+    this.openEditAppointment(this.appointmentModal);
+  }
+
+  deleteAppointment(index: number): void {
+    this.currentAppointment = this.myAppointments[index];
+    this.openDeleteAppointment(this.deleteAppointmentModal);
   }
 
   checkIfEventOverlaps(dateStart: Date, dateEnd: Date): boolean {
@@ -165,9 +196,22 @@ export class MyAppointmentsComponent implements OnInit {
 
   checkIfSameTimes = (date: Date, dateToCompare: Date): boolean => {
     return (
+      date.getDate() === dateToCompare.getDate() &&
       date.getHours() === dateToCompare.getHours() &&
       date.getMinutes() === dateToCompare.getMinutes()
     );
+  };
+
+  checkIfLessTime = (date: Date, dateToCompare: Date): boolean => {
+    return (
+      date.getHours() >= dateToCompare.getHours() &&
+      date.getMinutes() >= dateToCompare.getMinutes()
+    );
+  };
+
+  checkIfMoreThanAnHour = (date: Date, dateToCompare: Date): boolean => {
+    const ONE_HOUR = 60 * 60 * 1000;
+    return dateToCompare.getTime() - date.getTime() > ONE_HOUR;
   };
 
   checkIfOnTime = (beginDate: Date, endDate: Date): boolean => {
@@ -177,21 +221,15 @@ export class MyAppointmentsComponent implements OnInit {
     const hourStart = new Date(
       beginDate.getFullYear(),
       beginDate.getMonth() + 1,
-      beginDate.getDate(),
-      9,
-      0,
-      0,
-      0
+      beginDate.getDate()
     );
+    hourStart.setHours(9, 0, 0);
     const hourEnd = new Date(
       endDate.getFullYear(),
       endDate.getMonth() + 1,
-      endDate.getDate(),
-      20,
-      0,
-      0,
-      0
+      endDate.getDate()
     );
+    hourEnd.setHours(20, 0, 0);
 
     return (
       appointmentStart.getTime() >= hourStart.getTime() &&
@@ -210,7 +248,7 @@ export class MyAppointmentsComponent implements OnInit {
       0
     );
 
-  open(content): void {
+  openEditAppointment(content): void {
     this.modalService
       .open(content, { centered: true, ariaLabelledBy: 'modal-basic-title' })
       .result.then(
@@ -225,9 +263,29 @@ export class MyAppointmentsComponent implements OnInit {
       );
   }
 
+  openDeleteAppointment(content): void {
+    this.modalService
+      .open(content, { centered: true, ariaLabelledBy: 'modal-basic-title' })
+      .result.then(
+        () => {},
+        async (del) => {
+          if (del) {
+            await this.appointmentService.deleteAppointment(
+              this.currentAppointment.key,
+              this.collectionSize
+            );
+          }
+        }
+      );
+  }
+
   getFormattedDate(date: NgbDateStruct, time: any): Date {
     return new Date(
-      `${date.year}-${date.month}-${date.day} ${time.hour}:${time.minute}`
+      date.year,
+      date.month - 1,
+      date.day,
+      time.hour,
+      time.minute
     );
   }
 
@@ -235,7 +293,7 @@ export class MyAppointmentsComponent implements OnInit {
     this.error = { flag: false, msg: '' };
   }
 
-  handleEdit(): void {
+  async handleEdit(): Promise<void> {
     this.loading = true;
     const beginDate = this.getFormattedDate(this.date, this.beginTime);
     const endDate = this.getFormattedDate(this.date, this.endTime);
@@ -250,21 +308,35 @@ export class MyAppointmentsComponent implements OnInit {
           endDate
         )
       ) {
-        if (this.checkIfOnTime(beginDate, endDate)) {
-          this.sentAppointment = true;
-          this.currentAppointment = {
-            ...this.currentAppointment,
-            beginDate: beginDate.toISOString(),
-            endDate: endDate.toISOString(),
-          };
-          this.appointmentService.updateAppointment(
-            this.currentAppointment.key,
-            this.currentAppointment
-          );
+        if (!this.checkIfLessTime(beginDate, endDate)) {
+          if (this.checkIfOnTime(beginDate, endDate)) {
+            if (!this.checkIfMoreThanAnHour(beginDate, endDate)) {
+              this.sentAppointment = true;
+              this.currentAppointment = {
+                ...this.currentAppointment,
+                beginDate: beginDate.toISOString(),
+                endDate: endDate.toISOString(),
+              };
+              this.appointmentService.updateAppointment(
+                this.currentAppointment.key,
+                this.currentAppointment
+              );
+            } else {
+              this.error = {
+                flag: true,
+                msg: 'La cita puede durar como máximo una hora',
+              };
+            }
+          } else {
+            this.error = {
+              flag: true,
+              msg: 'Has seleccionado horas fuera de horario laboral',
+            };
+          }
         } else {
           this.error = {
             flag: true,
-            msg: 'Has seleccionado horas fuera de horario laboral',
+            msg: 'Has seleccionado un periodo inválido',
           };
         }
       } else {
@@ -280,5 +352,37 @@ export class MyAppointmentsComponent implements OnInit {
       };
     }
     this.loading = false;
+  }
+
+  async getAppointmentsByCriteria(
+    userNif: string,
+    type: string,
+    fromToday?: boolean
+  ): Promise<void> {
+    const response = await this.appointmentService.getAppointmentsByCriteria(
+      this.user.uid,
+      userNif,
+      type,
+      fromToday
+    );
+    this.setAppointments(response);
+    console.log(response);
+  }
+
+  getAppointmentsFilter(): void {
+    this.getAppointmentsByCriteria(
+      this.busquedaNif,
+      this.busquedaTipo,
+      this.busquedaHoy
+    );
+  }
+
+  refreshAppointments(): void {
+    this.myAppointments = this.myAppointmentsComplete
+      .map((appointment, i) => ({ id: i + 1, ...appointment }))
+      .slice(
+        (this.page - 1) * this.pageSize,
+        (this.page - 1) * this.pageSize + this.pageSize
+      );
   }
 }

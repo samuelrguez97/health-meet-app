@@ -1,6 +1,6 @@
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -8,6 +8,12 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AppRoutingModule } from './app-routing.module';
+
+import 'bootstrap/dist/css/bootstrap.css';
+import '@fortawesome/fontawesome-free/css/all.css';
+
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './pages/login/login.component';
@@ -29,6 +35,10 @@ import { FaqCardComponent } from './components/common/faq-card/faq-card.componen
 import { PasswordModalComponent } from './components/common/password-modal/password-modal.component';
 import { ErrorModalComponent } from './components/common/error-modal/error-modal.component';
 import { DeleteUserModalComponent } from './components/common/delete-user-modal/delete-user-modal.component';
+import { AppointmentViewModalComponent } from './components/common/appointment-view-modal/appointment-view-modal.component';
+import { UserManagementComponent } from './pages/user-management/user-management.component';
+
+registerLocaleData(localeEs, 'es');
 
 FullCalendarModule.registerPlugins([
   dayGridPlugin,
@@ -51,6 +61,8 @@ FullCalendarModule.registerPlugins([
     PasswordModalComponent,
     ErrorModalComponent,
     DeleteUserModalComponent,
+    AppointmentViewModalComponent,
+    UserManagementComponent,
   ],
   imports: [
     BrowserModule,
@@ -65,7 +77,7 @@ FullCalendarModule.registerPlugins([
     FullCalendarModule,
     FontAwesomeModule,
   ],
-  providers: [],
+  providers: [{ provide: LOCALE_ID, useValue: 'es' }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

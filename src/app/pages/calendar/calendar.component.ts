@@ -17,6 +17,8 @@ import { AppointmentsService } from '../../shared/services/appointments/appointm
 import { NgTemplateOutlet } from '@angular/common';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Router } from '@angular/router';
+import { AppointmentViewModalComponent } from 'src/app/components/common/appointment-view-modal/appointment-view-modal.component';
+import Utils from 'src/app/utils/Utils';
 
 @Component({
   selector: 'app-calendar',
@@ -31,13 +33,18 @@ export class CalendarComponent implements OnInit {
     private modalService: NgbModal,
     private formBuilder: FormBuilder,
     private breakpointObserver: BreakpointObserver,
+    private utils: Utils,
     private router: Router
   ) {
     this.crearFormulario();
+    this.appointmentService
+      .getAppointmentsLength()
+      .subscribe((response) => this.setAppointmentsLength(response));
   }
   user: UserData;
   appointmentForm: FormGroup;
   currentAppointment: Appointment;
+  userAppointments: Appointment[];
   loading: boolean;
   sentAppointment: boolean;
   isMobile: boolean;
@@ -47,6 +54,7 @@ export class CalendarComponent implements OnInit {
 
   private userEvents = [];
   private otherEvents = [];
+  collectionSize = 0;
 
   // references the #calendar in the template
   @ViewChild('calendar') calendarComponent: FullCalendarComponent;
@@ -55,7 +63,7 @@ export class CalendarComponent implements OnInit {
   @ViewChild('appointmentModal') appointmentModal: NgTemplateOutlet;
 
   calendarOptions: CalendarOptions = {
-    height: 480,
+    height: 800,
     initialView: 'timeGridWeek',
     weekends: false,
     locale: esLocale,
@@ -64,6 +72,7 @@ export class CalendarComponent implements OnInit {
     selectable: true,
     defaultAllDay: false,
     allDaySlot: false,
+    nowIndicator: true,
     slotDuration: '00:15:00',
     slotMinTime: '09:00',
     slotMaxTime: '20:30',
@@ -81,8 +90,95 @@ export class CalendarComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    await this.getCurrentUser();
     this.checkIfMobile();
+    await this.getCurrentUser();
+  }
+
+  async getCurrentUser(): Promise<void> {
+    if (!this.user) {
+      await this.authService.getCurrentUser().then((response) => {
+        this.user = response;
+        this.userDataService
+          .getUserData(response.uid)
+          .subscribe((response) => this.setCurrentUserData(response));
+      });
+    }
+  }
+
+  setCurrentUserData(response): void {
+    const userData = response[0];
+    if (userData.role === 'physio') {
+      this.router.navigate(['appointments']);
+    }
+    this.user = {
+      ...this.user,
+      ...userData,
+    };
+    this.appointmentService
+      .getUserAppointments(this.user.uid)
+      .subscribe((response) => this.setAppointments(response));
+  }
+
+  setAppointmentsLength(response: any): void {
+    this.collectionSize = response;
+  }
+
+  setAppointments(response: Appointment[]): void {
+    const calendarApi = this.calendarComponent.getApi();
+    this.resetCalendar();
+    if (response) {
+      this.userAppointments = response;
+      response.forEach((event) => {
+        let newEvent: any = {
+          start: event.beginDate,
+          end: event.endDate,
+          extendedProps: {
+            eventId: event.eventId,
+            key: event.key,
+          },
+        };
+        let existantEvent = false;
+        this.userEvents.forEach((userEvent) => {
+          if (userEvent.extendedProps.eventId === event.eventId) {
+            existantEvent = true;
+          }
+        });
+        this.otherEvents.forEach((userEvent) => {
+          if (userEvent.extendedProps.eventId === event.eventId) {
+            existantEvent = true;
+          }
+        });
+        if (!existantEvent) {
+          if (event.userUid === this.user.uid) {
+            newEvent = {
+              ...newEvent,
+              extendedProps: {
+                ...newEvent.extendedProps,
+                userId: this.user.uid,
+              },
+            };
+            this.userEvents.push(newEvent);
+          } else {
+            newEvent = {
+              ...newEvent,
+              title: 'Ocupado',
+              color: '#CC0000',
+            };
+            this.otherEvents.push(newEvent);
+          }
+          calendarApi.addEvent(newEvent);
+        }
+        this.deletePreviousAppointments();
+      });
+    }
+  }
+
+  resetCalendar(): void {
+    const calendarApi = this.calendarComponent.getApi();
+    this.userAppointments = [];
+    calendarApi.removeAllEvents();
+    this.userEvents = [];
+    this.otherEvents = [];
   }
 
   checkIfMobile(): void {
@@ -105,58 +201,6 @@ export class CalendarComponent implements OnInit {
     });
   }
 
-  getAppointments(): void {
-    const calendarApi = this.calendarComponent.getApi();
-    this.appointmentService
-      .getAppointments(this.user.physio)
-      .subscribe((response) => {
-        if (response) {
-          response.map((event) => {
-            let newEvent: any = {
-              start: event.beginDate,
-              end: event.endDate,
-              extendedProps: {
-                eventId: event.eventId,
-                key: event.key,
-              },
-            };
-            let existantEvent = false;
-            this.userEvents.map((userEvent) => {
-              if (userEvent.extendedProps.eventId === event.eventId) {
-                existantEvent = true;
-              }
-            });
-            this.otherEvents.map((userEvent) => {
-              if (userEvent.extendedProps.eventId === event.eventId) {
-                existantEvent = true;
-              }
-            });
-            if (!existantEvent) {
-              if (event.userUid === this.user.uid) {
-                newEvent = {
-                  ...newEvent,
-                  extendedProps: {
-                    ...newEvent.extendedProps,
-                    userId: this.user.uid,
-                  },
-                };
-                this.userEvents.push(newEvent);
-              } else {
-                newEvent = {
-                  ...newEvent,
-                  title: 'Ocupado',
-                  color: '#CC0000',
-                };
-                this.otherEvents.push(newEvent);
-              }
-              calendarApi.addEvent(newEvent);
-            }
-            this.deletePreviousAppointments();
-          });
-        }
-      });
-  }
-
   deletePreviousAppointments(): void {
     const calendarApi = this.calendarComponent.getApi();
     calendarApi.removeAllEvents();
@@ -165,7 +209,10 @@ export class CalendarComponent implements OnInit {
       today.setHours(0, 0, 0, 0);
       const endDate = new Date(event.end);
       if (endDate < today) {
-        this.appointmentService.deleteAppointment(event.extendedProps.key);
+        this.appointmentService.deleteAppointment(
+          event.extendedProps.key,
+          this.collectionSize
+        );
       } else {
         calendarApi.addEvent(event);
       }
@@ -175,59 +222,42 @@ export class CalendarComponent implements OnInit {
     });
   }
 
-  async getCurrentUser(): Promise<void> {
-    if (!this.user) {
-      await this.authService.getCurrentUser().then((response) => {
-        this.user = response;
-        this.getUserData();
-      });
-    } else {
-      this.getUserData();
-    }
-  }
-
-  getUserData(): void {
-    let userData: UserData;
-    this.userDataService.getUserData(this.user.uid).subscribe((response) => {
-      userData = response[0];
-      if (userData.role === 'physio') {
-        this.router.navigate(['appointments']);
-      }
-      this.user = {
-        ...this.user,
-        ...userData,
-      };
-      this.getAppointments();
-    });
-  }
-
   handleDateClick(date: any): void {
     if (this.user.role === 'user') {
       const dateStart = new Date(date.startStr);
       const dateEnd = new Date(date.endStr);
 
       if (!this.checkIfEventOverlaps(dateStart, dateEnd)) {
-        const time = this.diffHours(dateEnd, dateStart);
-        if (time <= 1) {
-          const appointment: Appointment = {
-            userUid: this.user.uid,
-            physioUid: this.user.physio,
-            beginDate: date.startStr,
-            endDate: date.endStr,
-            eventId: '_' + Math.random().toString(36).substr(2, 9),
-            type: null,
-            therapy: null,
-            pain: null,
-          };
+        if (this.timeGreaterThanCurrent(dateStart)) {
+          const time = this.diffHours(dateEnd, dateStart);
+          if (time <= 1) {
+            const appointment: Appointment = {
+              userNif: this.user.nif,
+              userUid: this.user.uid,
+              physioUid: this.user.physio,
+              date: this.utils.getDateFormatted(dateStart),
+              beginDate: date.startStr,
+              endDate: date.endStr,
+              eventId: '_' + Math.random().toString(36).substr(2, 9),
+              type: null,
+              therapy: null,
+              pain: null,
+            };
 
-          this.currentAppointment = appointment;
+            this.currentAppointment = appointment;
 
-          // Abrir modal
-          this.open(this.appointmentModal);
+            // Abrir modal
+            this.open(this.appointmentModal);
+          } else {
+            this.toastError = {
+              show: true,
+              msg: 'La cita puede durar como máximo 1 hora.',
+            };
+          }
         } else {
           this.toastError = {
             show: true,
-            msg: 'La cita puede durar como máximo 1 hora.',
+            msg: 'La hora de inicio debe ser superior a la actual.',
           };
         }
       } else {
@@ -262,6 +292,26 @@ export class CalendarComponent implements OnInit {
     return overlaps;
   }
 
+  timeGreaterThanCurrent(date: Date): boolean {
+    const today = new Date();
+    if (date.getMonth() > today.getMonth()) {
+      return true;
+    }
+    if (date.getDate() > today.getDate()) {
+      return true;
+    }
+    if (date.getHours() === today.getHours()) {
+      if (date.getMinutes() > today.getMinutes()) {
+        return true;
+      }
+    } else {
+      if (date.getHours() > today.getHours()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   diffHours(dt2: Date, dt1: Date): number {
     let diff = (dt2.getTime() - dt1.getTime()) / 1000;
     diff /= 60 * 60;
@@ -275,19 +325,30 @@ export class CalendarComponent implements OnInit {
       selectedEvent.extendedProps &&
       selectedEvent.extendedProps.userId === this.user.uid
     ) {
-      console.log('tu evento');
+      const modalRef = this.modalService.open(AppointmentViewModalComponent, {
+        centered: true,
+      });
+      modalRef.componentInstance.appointment = this.userAppointments.filter(
+        (appointment) => appointment.key === selectedEvent.extendedProps.key
+      )[0];
+      modalRef.result.then(
+        () => (this.userEvents = []),
+        () => (this.userEvents = [])
+      );
     }
   }
 
   open(content): void {
     this.modalService
       .open(content, { centered: true, ariaLabelledBy: 'modal-basic-title' })
-      .result.then((result) => {});
+      .result.then(
+        () => (this.sentAppointment = false),
+        () => (this.sentAppointment = false)
+      );
   }
 
   handleSubmit(): void {
     if (this.appointmentForm.invalid) {
-      console.log('invalid');
       this.appointmentForm.markAsTouched();
       return;
     }
@@ -303,7 +364,10 @@ export class CalendarComponent implements OnInit {
       pain,
     };
 
-    this.appointmentService.createAppointment(this.currentAppointment);
+    this.appointmentService.createAppointment(
+      this.currentAppointment,
+      this.collectionSize
+    );
     this.loading = false;
     this.sentAppointment = true;
     this.appointmentForm.reset();

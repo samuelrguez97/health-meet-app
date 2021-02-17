@@ -1,0 +1,82 @@
+<div class="modal-header">
+  <h4 class="modal-title" id="modal-basic-title">Detalle de cita</h4>
+  <button
+    type="button"
+    class="close no-outline"
+    aria-label="Close"
+    (click)="activeModal.dismiss()"
+  >
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div *ngIf="loading">
+    <div class="d-flex justify-content-center mt-4">
+      <div
+        class="text-primary spinner-border"
+        style="width: 16rem; height: 16rem"
+        role="status"
+      >
+        <span class="sr-only">Cargando ...</span>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!deletedAppointment; else sent">
+    <div class="m-3">
+      <div class="label mb-2">Hora inicio cita</div>
+      <div class="info">
+        {{ appointment.beginDate | date: "medium" }}
+      </div>
+    </div>
+    <div class="m-3">
+      <div class="label mb-2">Hora fin cita</div>
+      <div class="info">{{ appointment.endDate | date: "medium" }}</div>
+    </div>
+    <div class="separator mt-4 mb-4 w-100"></div>
+    <div class="form-box rounded p-2">
+      <div class="mt-3 mb-3 ml-2 mr-2">
+        <div class="label mb-2">Tipo</div>
+        <div class="info">
+          {{ appointment.type }}
+        </div>
+      </div>
+      <div class="mt-3 mb-3 ml-2 mr-2">
+        <label class="label mb-2" for="selectTherapy">Tipo de terapia</label>
+        <div class="info">
+          {{ appointment.therapy }}
+        </div>
+      </div>
+      <div class="mt-3 mb-3 ml-2 mr-2">
+        <label class="label mb-2" for="pain">Descripción de tu dolencia</label>
+        <div class="info">
+          {{ appointment.pain }}
+        </div>
+      </div>
+    </div>
+    <div class="mt-3 text-right">
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="deleteAppointment()"
+      >
+        Eliminar cita
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-outline-primary"
+    (click)="activeModal.close(); deletedAppointment = false"
+  >
+    Cerrar
+  </button>
+</div>
+
+<ng-template #sent>
+  <div class="w-100 text-center pt-5 pb-5">
+    <fa-icon class="doneIcon text-success" [icon]="faCheckCircle"></fa-icon>
+    <div class="doneText text-muted mt-5">¡Cita eliminada correctamente!</div>
+  </div>
+</ng-template>

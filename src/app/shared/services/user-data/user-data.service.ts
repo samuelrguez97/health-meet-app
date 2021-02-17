@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
+import { AngularFireDatabase } from '@angular/fire/database';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { UserData } from '../../models/user-data.model';
-import { User } from '../../models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +14,27 @@ export class UserDataService {
     private realtimeDb: AngularFireDatabase,
     public afAuth: AngularFireAuth
   ) {}
+
+  async getUserDataAsync(userId: string): Promise<any> {
+    return new Promise((resolve) => {
+      this.realtimeDb
+        .list(`/userData`, (ref) =>
+          ref.orderByChild('uid').equalTo(userId).limitToFirst(1)
+        )
+        .snapshotChanges()
+        .pipe(
+          map((changes) =>
+            changes.map((c) => ({
+              key: c.payload.key,
+              ...(c as any).payload.val(),
+            }))
+          )
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    }).then((res) => res);
+  }
 
   getUserData(userId: string): Observable<any> {
     return this.realtimeDb
@@ -54,8 +74,10 @@ export class UserDataService {
     value: string,
     cb: Function
   ): Promise<void> {
-    this.realtimeDb.list('/userData').update(key, { [field]: value });
-    cb();
+    this.realtimeDb
+      .object(`/userData/${key}`)
+      .update({ [field]: value })
+      .finally(() => cb());
   }
 
   async deleteUserData(uid: string): Promise<any> {

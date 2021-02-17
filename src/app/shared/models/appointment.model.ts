@@ -3,6 +3,7 @@ export interface Appointment {
   userUid: string;
   userNif?: string;
   physioUid: string;
+  date: string;
   beginDate: string;
   endDate: string;
   eventId: string;

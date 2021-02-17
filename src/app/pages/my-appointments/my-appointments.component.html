@@ -1,6 +1,92 @@
+<div *ngIf="loading">
+  <div class="d-flex justify-content-center mt-4">
+    <div
+      class="text-primary spinner-border"
+      style="width: 4rem; height: 4rem"
+      role="status"
+    >
+      <span class="sr-only">Cargando ...</span>
+    </div>
+  </div>
+</div>
+
+<div class="mt-3 mb-3 p-2 box shadow rounded">
+  <div class="row align-items-center h-100 w-100 m-0">
+    <div
+      class="filter-row col-12 col-lg-5 col-xl-3 p-2 d-flex align-items-center"
+    >
+      <div class="filter-separator mr-3"></div>
+      <div class="mr-2">Búsqueda por nif</div>
+      <div>
+        <input
+          type="text"
+          class="form-control"
+          id="nif"
+          [(ngModel)]="busquedaNif"
+        />
+      </div>
+    </div>
+    <div
+      class="filter-row col-12 col-lg-4 col-xl-3 p-2 d-flex align-items-center"
+    >
+      <div class="filter-separator mr-3"></div>
+      <div class="mr-2">Búsqueda por tipo</div>
+      <div>
+        <select
+          class="form-control"
+          id="busquedaTipoSelect"
+          [(ngModel)]="busquedaTipo"
+        >
+          <option *ngFor="let type of types" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div
+      class="filter-row col-12 col-lg-3 col-xl-2 p-2 d-flex align-items-center"
+    >
+      <div class="filter-separator mr-3"></div>
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="busquedaHoy"
+          [(ngModel)]="busquedaHoy"
+        />
+        <label class="form-check-label" for="busquedaHoy">
+          Citas para hoy
+        </label>
+      </div>
+    </div>
+    <div
+      class="filter-row col-12 col-lg-6 col-xl-4 p-2 d-flex align-items-center"
+    >
+      <div class="d-flex justify-content-end w-100">
+        <div class="mr-2">
+          <button class="btn btn-info" (click)="getAppointmentsFilter()">
+            Aplicar filtros
+          </button>
+        </div>
+        <div>
+          <button class="btn btn-outline-info" (click)="getAppointments()">
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!loading && (!myAppointments || myAppointments?.length === 0)">
+  <div class="appointments-not-found text-center mt-5">
+    Lo sentimos, no se han encontrado citas previstas
+  </div>
+</div>
+
 <div
-  *ngIf="!isMobile && myAppointments?.length > 0"
-  class="tableBox shadow rounded"
+  *ngIf="!loading && !isMobile && myAppointments?.length > 0"
+  class="box shadow rounded"
 >
   <table class="table table-striped">
     <thead>
@@ -13,7 +99,7 @@
         <th scope="col">Tipo</th>
         <th scope="col">Terapia</th>
         <th scope="col">Descripción</th>
-        <th scope="col"></th>
+        <th scope="col">Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -27,18 +113,35 @@
         <td>{{ appointment.endDate | date: "shortTime" }}</td>
         <td>{{ appointment.type }}</td>
         <td>{{ appointment.therapy }}</td>
-        <td>{{ appointment.pain }}</td>
         <td>
-          <button class="btn btn-primary btn-sm" (click)="editAppointment(i)">
-            Editar
-          </button>
+          <div class="appointment-description">{{ appointment.pain }}</div>
+        </td>
+        <td>
+          <div class="row pr-2">
+            <div class="col-12 col-lg-6">
+              <button
+                class="btn btn-block btn-primary btn-sm"
+                (click)="editAppointment(i)"
+              >
+                Editar
+              </button>
+            </div>
+            <div class="col-12 col-lg-6">
+              <button
+                class="btn btn-block btn-danger btn-sm"
+                (click)="deleteAppointment(i)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
         </td>
       </tr>
     </tbody>
   </table>
 </div>
 
-<div *ngIf="isMobile && myAppointments?.length > 0">
+<div *ngIf="!loading && isMobile && myAppointments?.length > 0">
   <div
     *ngFor="let appointment of myAppointments; index as i"
     class="appointmentMobileBox mb-3"
@@ -65,24 +168,53 @@
       <span class="appointmentLabel">Terapia:</span> {{ appointment.therapy }}
     </div>
     <div class="appointmentText">
-      <span class="appointmentLabel">Descripción:</span> {{ appointment.pain }}
+      <span class="appointmentLabel">Descripción: </span>
+      <div class="d-inline appointment-description">{{ appointment.pain }}</div>
     </div>
     <div class="mt-3">
-      <button class="btn btn-block btn-primary" (click)="editAppointment(i)">
-        Editar
-      </button>
+      <div class="row justify-content-between">
+        <div class="col-6">
+          <button
+            class="btn btn-block btn-primary"
+            (click)="editAppointment(i)"
+          >
+            Editar
+          </button>
+        </div>
+        <div class="col-6">
+          <button
+            class="btn btn-block btn-danger"
+            (click)="deleteAppointment(i)"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<ng-template #appointmentModal let-modal>
+<div
+  *ngIf="!loading && myAppointments?.length > 0 && collectionSize > pageSize"
+  class="mt-4 justify-content-center d-flex"
+>
+  <ngb-pagination
+    [collectionSize]="collectionSize"
+    [(page)]="page"
+    [pageSize]="pageSize"
+    (pageChange)="refreshAppointments()"
+  >
+  </ngb-pagination>
+</div>
+
+<ng-template #appointmentModal let-appointmentModal>
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Editar cita</h4>
     <button
       type="button"
       class="close no-outline"
       aria-label="Close"
-      (click)="modal.dismiss()"
+      (click)="appointmentModal.dismiss()"
     >
       <span aria-hidden="true">&times;</span>
     </button>
@@ -134,8 +266,8 @@
         </div>
       </div>
       <div class="separator mt-4 mb-4 w-100"></div>
-      <div class="mt-4 m-3 d-flex">
-        <div class="mr-5">
+      <div class="row mt-4 m-2">
+        <div class="p-0 col-12 col-md-5 m-2">
           <div class="label mb-2">Hora inicio cita</div>
           <div class="info">
             <ngb-timepicker
@@ -144,7 +276,7 @@
             ></ngb-timepicker>
           </div>
         </div>
-        <div>
+        <div class="p-0 col-12 col-md-5 m-2">
           <div class="label mb-2">Hora fin cita</div>
           <div class="info">
             <ngb-timepicker
@@ -182,9 +314,43 @@
       *ngIf="sentAppointment"
       type="button"
       class="btn btn-outline-primary"
-      (click)="modal.close()"
+      (click)="appointmentModal.close()"
     >
       Confirmar
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #deleteAppointmentModal let-deleteAppointmentModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Eliminar cita</h4>
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="deleteAppointmentModal.dismiss(false)"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="info">¿Desea eliminar esta cita?</div>
+  </div>
+
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-danger"
+      (click)="deleteAppointmentModal.dismiss(true)"
+    >
+      Eliminar
+    </button>
+    <button
+      type="button"
+      class="btn btn-outline-dark"
+      (click)="deleteAppointmentModal.dismiss(false)"
+    >
+      Cerrar
     </button>
   </div>
 </ng-template>

@@ -1,67 +1,72 @@
 .calendarBox {
-    background-color: white;
-    padding: 30px;
+  background-color: white;
+  padding: 30px;
 }
 
 @media (max-width: 500px) {
-    .calendarBox {
-        padding: 5px;
-    }
+  .calendarBox {
+    padding: 5px;
+  }
 }
 
 .toast-box {
-    position: fixed;
-    width: 200px;
-    height: 150px;
-    left: 0;
-    right: 0;
-    top: 50px;
-    margin-left: auto;
-    margin-right: auto;
-    z-index: 1000;
+  position: fixed;
+  height: 150px;
+  left: 0;
+  right: 0;
+  top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 1000;
 }
 
 .toast-box-body {
-    padding: 0;
-    margin: 0;
-    width: 100%;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
 .buttonInfoMargin {
-    margin: 0 auto;
-    width: 184px;
+  margin: 0 auto;
+  width: 184px;
 }
 
 .modal-title {
-    font-size: 25px;
+  font-size: 25px;
 }
 
 .no-outline {
-    outline: none;
+  outline: none;
 }
 
 .separator {
-    height: 1px;
-    background-color: #007bff33;
+  height: 1px;
+  background-color: #007bff33;
 }
 
 .form-box {
-    border: 0.5px solid #dee2e6;
+  border: 0.5px solid #dee2e6;
 }
 
 .label {
-    font-size: 18px;
-    color: #007bff;
+  font-size: 18px;
+  color: #007bff;
 }
 
 .info {
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .doneIcon {
-    font-size: 200px;
+  font-size: 200px;
 }
 
 .doneText {
-    font-size: 30px;
+  font-size: 30px;
+}
+
+.reloadCalendarLink {
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: bold;
 }

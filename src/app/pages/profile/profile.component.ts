@@ -21,6 +21,19 @@ import { DeleteUserModalComponent } from 'src/app/components/common/delete-user-
   styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent implements OnInit {
+  constructor(
+    private authService: AuthService,
+    private userDataService: UserDataService,
+    private navbarService: NavbarService,
+    private appointmentService: AppointmentsService,
+    private modalService: NgbModal,
+    private router: Router
+  ) {
+    this.appointmentService
+      .getAppointmentsLength()
+      .subscribe((response) => this.setAppointmentsLength(response));
+  }
+
   user: UserData;
   faEdit = faEdit;
   faSave = faSave;
@@ -56,14 +69,7 @@ export class ProfileComponent implements OnInit {
   @ViewChild('email') email;
   @ViewChild('phone') phone;
 
-  constructor(
-    private authService: AuthService,
-    private userDataService: UserDataService,
-    private navbarService: NavbarService,
-    private appointmentsService: AppointmentsService,
-    private modalService: NgbModal,
-    private router: Router
-  ) {}
+  collectionSize: number = 0;
 
   async ngOnInit(): Promise<void> {
     this.getUserData();
@@ -82,6 +88,10 @@ export class ProfileComponent implements OnInit {
         this.user = user;
       }
     });
+  }
+
+  setAppointmentsLength(response: any): void {
+    this.collectionSize = response;
   }
 
   edit(field: string): void {
@@ -108,15 +118,22 @@ export class ProfileComponent implements OnInit {
       if (value !== this.user[field]) {
         this.loading = { ...this.loading, [field]: true };
         if (field === 'email') {
-          this.modalService.open(PasswordModalComponent).result.then(
-            (result) => {
-              this.updateEmail(result, value);
-            },
-            () => {
-              this.editing = { ...this.editing, [field]: !this.editing[field] };
-              this.loading = { ...this.loading, [field]: false };
-            }
-          );
+          this.modalService
+            .open(PasswordModalComponent, {
+              centered: true,
+            })
+            .result.then(
+              (result) => {
+                this.updateEmail(result, value);
+              },
+              () => {
+                this.editing = {
+                  ...this.editing,
+                  [field]: !this.editing[field],
+                };
+                this.loading = { ...this.loading, [field]: false };
+              }
+            );
         } else {
           this.userDataService.updateUserData(this.user.key, field, value, () =>
             this.updateCallback(field, value, false)
@@ -144,7 +161,9 @@ export class ProfileComponent implements OnInit {
       this.getUserData();
       this.navbarService.dispathNavbar();
     } else {
-      const errorModal = this.modalService.open(ErrorModalComponent);
+      const errorModal = this.modalService.open(ErrorModalComponent, {
+        centered: true,
+      });
       errorModal.componentInstance.error = error.message;
     }
   }
@@ -158,36 +177,47 @@ export class ProfileComponent implements OnInit {
   }
 
   eliminarCuenta(): void {
-    this.modalService.open(PasswordModalComponent).result.then(
-      async (result) => {
-        const deleteUserPromise = await this.authService.deleteUser(
-          this.user.email,
-          result
-        );
-        const deleteUserDataPromise = await this.userDataService.deleteUserData(
-          this.user.uid
-        );
-        const deleteUserAppointmentsPromise = await this.appointmentsService.deleteUserAppointments(
-          this.user.uid
-        );
-        Promise.all([
-          deleteUserPromise,
-          deleteUserDataPromise,
-          deleteUserAppointmentsPromise,
-        ])
-          .then(() => {
-            this.modalService.open(DeleteUserModalComponent).result.then(
-              () => this.logOutOnDelete(),
-              () => this.logOutOnDelete()
-            );
-          })
-          .catch((error) => {
-            const errorModal = this.modalService.open(ErrorModalComponent);
-            errorModal.componentInstance.error = error.message;
-          });
-      },
-      () => {}
-    );
+    this.modalService
+      .open(PasswordModalComponent, {
+        centered: true,
+      })
+      .result.then(
+        async (result) => {
+          const deleteUserPromise = await this.authService.deleteUser(
+            this.user.email,
+            result
+          );
+          const deleteUserDataPromise = await this.userDataService.deleteUserData(
+            this.user.uid
+          );
+          const deleteUserAppointmentsPromise = await this.appointmentService.deleteUserAppointments(
+            this.user.uid,
+            this.collectionSize
+          );
+          Promise.all([
+            deleteUserPromise,
+            deleteUserDataPromise,
+            deleteUserAppointmentsPromise,
+          ])
+            .then(() => {
+              this.modalService
+                .open(DeleteUserModalComponent, {
+                  centered: true,
+                })
+                .result.then(
+                  () => this.logOutOnDelete(),
+                  () => this.logOutOnDelete()
+                );
+            })
+            .catch((error) => {
+              const errorModal = this.modalService.open(ErrorModalComponent, {
+                centered: true,
+              });
+              errorModal.componentInstance.error = error.message;
+            });
+        },
+        () => {}
+      );
   }
 
   logOutOnDelete(): void {
