@@ -342,6 +342,7 @@ export class MyAppointmentsComponent implements OnInit {
                 beginDate: beginDate.toISOString(),
                 endDate: endDate.toISOString(),
               };
+              delete this.currentAppointment['id'];
               this.appointmentService.updateAppointment(
                 this.currentAppointment.key,
                 this.currentAppointment
@@ -418,7 +419,9 @@ export class MyAppointmentsComponent implements OnInit {
 
   refreshAppointments(): void {
     this.myAppointments = this.myAppointmentsComplete
-      .map((appointment, i) => ({ id: i + 1, ...appointment }))
+      .map((appointment, i) => {
+        return { id: i + 1, ...appointment };
+      })
       .slice(
         (this.page - 1) * this.pageSize,
         (this.page - 1) * this.pageSize + this.pageSize
