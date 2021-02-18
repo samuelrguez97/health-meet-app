@@ -87,49 +87,99 @@
         </div>
       </div>
       <div class="separator mt-4 mb-4 w-100"></div>
-      <form
-        autocomplete="off"
-        [formGroup]="appointmentForm"
-        (ngSubmit)="handleSubmit()"
-      >
-        <div class="form-group form-box rounded p-2">
-          <div class="mt-3 mb-3 ml-2 mr-2 position-relative">
-            <label class="label mb-2" for="userName"
-              >Indica el usuario a citar</label
-            >
+      <div class="form-group form-box rounded p-2">
+        <div class="mt-3 mb-3 ml-2 mr-2">
+          <div class="custom-control custom-switch">
             <input
-              class="form-control"
-              id="userName"
-              formControlName="userName"
-              [value]="userSearched?.name"
-              (input)="handleSearchUser()"
-              [class.is-valid]="userList?.length > 0"
-              [class.is-invalid]="
-                userList?.length === 0 &&
-                !userSearched &&
-                appointmentForm.controls.userName.touched
-              "
+              type="checkbox"
+              class="custom-control-input"
+              id="nonExistentUserSwitch"
+              (change)="handleNonExistentUserSwitch()"
             />
-            <div
-              class="position-absolute box rounded shadow w-100 user-search-box"
-              *ngIf="userList?.length > 0"
+            <label class="custom-control-label info" for="nonExistentUserSwitch"
+              >Usuario no existente</label
             >
-              <div
-                class="user-search-item"
-                *ngFor="let user of userList"
-                (click)="handleSearchClick(user)"
-              >
-                {{ user.name }} {{ user.surname }}
-              </div>
+          </div>
+        </div>
+        <div *ngIf="nonExistentUser">
+          <form autocomplete="off" [formGroup]="nonExistentUserForm">
+            <div class="mt-3 mb-3 ml-2 mr-2">
+              <label class="label mb-2" for="name">Nombre</label>
+              <input
+                class="form-control"
+                id="name"
+                formControlName="name"
+                [class.is-invalid]="
+                  nonExistentUserForm.controls.name.invalid &&
+                  nonExistentUserForm.controls.name.touched
+                "
+              />
             </div>
-            <div class="user-search-show mt-4 box rounded" *ngIf="userSearched">
-              <div><span>Nif:</span> {{ userSearched.nif }}</div>
-              <div>
-                <span>Nombre:</span> {{ userSearched.name }}
-                {{ userSearched.surname }}
-              </div>
+            <div class="mt-3 mb-3 ml-2 mr-2">
+              <label class="label mb-2" for="nif">NIF</label>
+              <input
+                class="form-control"
+                id="nif"
+                formControlName="nif"
+                [class.is-invalid]="
+                  nonExistentUserForm.controls.nif.invalid &&
+                  nonExistentUserForm.controls.nif.touched
+                "
+              />
+            </div>
+            <div class="mt-3 mb-3 ml-2 mr-2">
+              <label class="label mb-2" for="phone">Teléfono</label>
+              <input
+                class="form-control"
+                id="phone"
+                formControlName="phone"
+                [class.is-invalid]="
+                  nonExistentUserForm.controls.phone.invalid &&
+                  nonExistentUserForm.controls.phone.touched
+                "
+              />
+            </div>
+          </form>
+        </div>
+        <div
+          class="mt-3 mb-3 ml-2 mr-2 position-relative"
+          *ngIf="!nonExistentUser"
+        >
+          <label class="label mb-2" for="userName"
+            >Indica el usuario a citar</label
+          >
+          <input
+            class="form-control"
+            id="userName"
+            [value]="userSearched?.name"
+            (input)="handleSearchUser($event)"
+            [class.is-valid]="userList?.length > 0"
+          />
+          <div
+            class="position-absolute box rounded shadow w-100 user-search-box"
+            *ngIf="userList?.length > 0"
+          >
+            <div
+              class="user-search-item"
+              *ngFor="let user of userList"
+              (click)="handleSearchClick(user)"
+            >
+              {{ user.name }} {{ user.surname }}
             </div>
           </div>
+          <div class="user-search-show mt-4 box rounded" *ngIf="userSearched">
+            <div><span>Nif:</span> {{ userSearched.nif }}</div>
+            <div>
+              <span>Nombre:</span> {{ userSearched.name }}
+              {{ userSearched.surname }}
+            </div>
+          </div>
+        </div>
+        <form
+          autocomplete="off"
+          [formGroup]="appointmentForm"
+          (ngSubmit)="handleSubmit()"
+        >
           <div class="mt-3 mb-3 ml-2 mr-2">
             <div class="label mb-2">¿Viene de un seguro?</div>
             <div class="form-check form-check-inline mr-4">
@@ -188,8 +238,8 @@
               cols="40"
             ></textarea>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
     <div *ngIf="userHasAppointment">
       <div class="justify-content-center">
@@ -207,7 +257,11 @@
   <div class="modal-footer">
     <button
       *ngIf="!sentAppointment"
-      [disabled]="appointmentForm.invalid || !userSearched"
+      [disabled]="
+        !nonExistentUser
+          ? appointmentForm.invalid || !userSearched
+          : appointmentForm.invalid && nonExistentUserForm.invalid
+      "
       type="button"
       class="btn btn-outline-primary"
       (click)="handleSubmit()"

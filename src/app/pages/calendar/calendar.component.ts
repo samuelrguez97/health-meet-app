@@ -110,7 +110,14 @@ export class CalendarComponent implements OnInit {
     };
     this.appointmentService
       .getUserAppointments(this.user.uid)
-      .subscribe((response) => this.setAppointments(response));
+      .subscribe((responseUser) => {
+        this.appointmentService
+          .getAppointments(this.user.physio)
+          .subscribe((responsePhysio) =>
+            this.setAppointments(responseUser, responsePhysio)
+          );
+      });
+
     this.userDataService
       .getUserAppointmentsLength(this.user.physio)
       .subscribe((response) => this.setAppointmentsLength(response));
@@ -120,9 +127,18 @@ export class CalendarComponent implements OnInit {
     this.collectionSize = response;
   }
 
-  setAppointments(response: Appointment[]): void {
+  setAppointments(
+    responseUser: Appointment[],
+    responsePhysio: Appointment[]
+  ): void {
     const calendarApi = this.calendarComponent.getApi();
     this.resetCalendar();
+
+    let response = responseUser.concat(responsePhysio);
+    response = response.filter((item, index) => {
+      return response.indexOf(item) == index;
+    });
+
     if (response) {
       this.userAppointments = response;
       response.forEach((event) => {
@@ -174,7 +190,7 @@ export class CalendarComponent implements OnInit {
   resetCalendar(): void {
     const calendarApi = this.calendarComponent.getApi();
     this.userAppointments = [];
-    calendarApi.removeAllEvents();
+    calendarApi?.removeAllEvents();
     this.userEvents = [];
     this.otherEvents = [];
   }
@@ -236,6 +252,7 @@ export class CalendarComponent implements OnInit {
             const appointment: Appointment = {
               userNif: this.user.nif,
               userName: `${this.user.name} ${this.user.surname}`,
+              userPhone: this.user.phone,
               userUid: this.user.uid,
               physioUid: this.user.physio,
               physioName: physio.name,

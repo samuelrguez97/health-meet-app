@@ -18,13 +18,13 @@
   background-color: #007bff;
 }
 
-.filter-button {
+.icon-button {
   position: relative;
   height: 40px;
   width: 40px;
 }
 
-.filter-button-icon {
+.icon-button-img {
   position: absolute;
   top: 7px;
   left: 7px;

@@ -35,7 +35,7 @@ export class PhysioCalendarComponent implements OnInit {
     private formBuilder: FormBuilder,
     private utils: Utils
   ) {
-    this.crearFormulario();
+    this.crearFormularios();
     this.loadPhysios();
   }
 
@@ -55,12 +55,15 @@ export class PhysioCalendarComponent implements OnInit {
   faCheckCircle = faCheckCircle;
 
   /* Busqueda usuarios */
+  nonExistentUser: boolean = false;
+  nonExistentUserForm: FormGroup;
   userList: UserData[] = [];
   userSearched: UserData;
   userHasAppointment: boolean;
 
   private events = [];
   collectionSize = 0;
+  /* */
 
   // references the #calendar in the template
   @ViewChild('calendar') calendarComponent: FullCalendarComponent;
@@ -188,12 +191,30 @@ export class PhysioCalendarComponent implements OnInit {
     this.events = [];
   }
 
-  crearFormulario(): void {
+  crearFormularios(): void {
     this.appointmentForm = this.formBuilder.group({
-      userName: ['', [Validators.required]],
       type: ['', [Validators.required]],
       therapy: ['', [Validators.required]],
       pain: ['', [Validators.required]],
+    });
+
+    this.nonExistentUserForm = this.formBuilder.group({
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('[a-zA-Z0-9À-ÿ\u00f1\u00d1]{3,16}$'),
+        ],
+      ],
+      nif: ['', [Validators.required, Validators.pattern('[0-9]{8}[A-Z]{1}$')]],
+      phone: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('[0-9]{9}$'),
+          Validators.minLength(9),
+        ],
+      ],
     });
   }
 
@@ -201,6 +222,15 @@ export class PhysioCalendarComponent implements OnInit {
     this.userDataService
       .getUserData(event.target.value)
       .subscribe((response) => this.setCurrentUserData(response));
+  }
+
+  handleNonExistentUserSwitch(): void {
+    if (!this.nonExistentUser) {
+      this.userSearched = null;
+    } else {
+      this.nonExistentUserForm.reset();
+    }
+    this.nonExistentUser = !this.nonExistentUser;
   }
 
   handleDateClick(date: any): void {
@@ -314,8 +344,8 @@ export class PhysioCalendarComponent implements OnInit {
     }
   }
 
-  async handleSearchUser(): Promise<void> {
-    const input = this.appointmentForm.value.userName;
+  async handleSearchUser(event): Promise<void> {
+    const input = event.target.value;
     if (input) {
       const users: UserData[] = await this.userDataService.getUsersByName(
         input
@@ -352,41 +382,63 @@ export class PhysioCalendarComponent implements OnInit {
       return;
     }
 
-    const userNif = this.userSearched.nif;
-    const userName = `${this.userSearched.name} ${this.userSearched.surname}`;
-    const userUid = this.userSearched.uid;
-
-    const userHasAppointment = await this.appointmentService.checkIfUserHasAppointment(
-      userUid,
-      new Date(this.currentAppointment.beginDate),
-      new Date(this.currentAppointment.endDate)
-    );
-
-    if (userHasAppointment) {
-      this.userHasAppointment = true;
+    if (this.nonExistentUser && this.nonExistentUserForm.invalid) {
+      this.nonExistentUserForm.markAsTouched();
       return;
-    } else {
-      this.userHasAppointment = false;
     }
 
     const { type, therapy, pain } = this.appointmentForm.value;
 
-    this.loading = true;
+    if (!this.nonExistentUser) {
+      const userNif = this.userSearched.nif;
+      const userName = `${this.userSearched.name} ${this.userSearched.surname}`;
+      const userUid = this.userSearched.uid;
+      const userPhone = this.userSearched.phone;
 
-    this.currentAppointment = {
-      ...this.currentAppointment,
-      userNif,
-      userName,
-      userUid,
-      type,
-      therapy,
-      pain,
-    };
+      const userHasAppointment = await this.appointmentService.checkIfUserHasAppointment(
+        userUid,
+        new Date(this.currentAppointment.beginDate),
+        new Date(this.currentAppointment.endDate)
+      );
+
+      if (userHasAppointment) {
+        this.userHasAppointment = true;
+        return;
+      } else {
+        this.userHasAppointment = false;
+      }
+
+      this.currentAppointment = {
+        ...this.currentAppointment,
+        userNif,
+        userName,
+        userUid,
+        userPhone,
+        type,
+        therapy,
+        pain,
+      };
+    } else {
+      const { name, nif, phone } = this.nonExistentUserForm.value;
+
+      this.currentAppointment = {
+        ...this.currentAppointment,
+        userNif: nif,
+        userName: name,
+        userPhone: phone,
+        type,
+        therapy,
+        pain,
+      };
+    }
+
+    this.loading = true;
 
     this.appointmentService.createAppointment(this.currentAppointment);
     this.userDataService.addUserAppointment(this.currentPhysio.uid);
     this.loading = false;
     this.sentAppointment = true;
     this.appointmentForm.reset();
+    this.nonExistentUserForm.reset();
   }
 }

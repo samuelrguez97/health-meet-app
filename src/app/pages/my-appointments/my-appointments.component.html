@@ -72,19 +72,19 @@
       <div class="d-flex justify-content-end w-100">
         <div class="mr-2">
           <button
-            class="btn btn-info filter-button"
+            class="btn btn-info icon-button"
             (click)="getAppointmentsFilter()"
             (keyup.enter)="getAppointmentsFilter()"
           >
-            <span class="material-icons filter-button-icon"> filter_alt </span>
+            <span class="material-icons icon-button-img"> filter_alt </span>
           </button>
         </div>
         <div>
           <button
-            class="btn btn-outline-danger filter-button"
+            class="btn btn-outline-danger icon-button"
             (click)="resetAppointments()"
           >
-            <span class="material-icons filter-button-icon"> clear </span>
+            <span class="material-icons icon-button-img"> clear </span>
           </button>
         </div>
       </div>
@@ -108,6 +108,7 @@
         <th scope="col">#</th>
         <th scope="col">Nif</th>
         <th scope="col">Nombre</th>
+        <th scope="col">Teléfono</th>
         <th scope="col">Fecha</th>
         <th scope="col">Hora inicio</th>
         <th scope="col">Hora fin</th>
@@ -126,6 +127,9 @@
         <td>
           {{ appointment.userName }}
         </td>
+        <td>
+          {{ appointment.userPhone }}
+        </td>
         <td>{{ appointment.beginDate | date: "shortDate" }}</td>
         <td>{{ appointment.beginDate | date: "shortTime" }}</td>
         <td>{{ appointment.endDate | date: "shortTime" }}</td>
@@ -135,21 +139,21 @@
           <div class="appointment-description">{{ appointment.pain }}</div>
         </td>
         <td>
-          <div class="row pr-2">
-            <div class="col-12 col-lg-6">
+          <div class="d-flex justify-content-around">
+            <div>
               <button
-                class="btn btn-block btn-primary btn-sm"
+                class="btn btn-block btn-primary btn-sm icon-button"
                 (click)="editAppointment(i)"
               >
-                Editar
+                <span class="material-icons icon-button-img"> mode_edit </span>
               </button>
             </div>
-            <div class="col-12 col-lg-6">
+            <div>
               <button
-                class="btn btn-block btn-danger btn-sm"
+                class="btn btn-block btn-danger btn-sm icon-button"
                 (click)="deleteAppointment(i)"
               >
-                Eliminar
+                <span class="material-icons icon-button-img"> delete </span>
               </button>
             </div>
           </div>
@@ -169,6 +173,10 @@
     </div>
     <div class="appointmentText">
       <span class="appointmentLabel">Nombre:</span> {{ appointment.userName }}
+    </div>
+    <div class="appointmentText">
+      <span class="appointmentLabel">Teléfono:</span>
+      {{ appointment.userPhone }}
     </div>
     <div class="appointmentText">
       <span class="appointmentLabel">Fecha:</span>
@@ -199,7 +207,12 @@
             class="btn btn-block btn-primary"
             (click)="editAppointment(i)"
           >
-            Editar
+            <div class="d-flex align-items-center">
+              <div class="d-flex mx-auto align-items-center">
+                <span class="material-icons mr-2"> mode_edit </span>
+                <span>Editar</span>
+              </div>
+            </div>
           </button>
         </div>
         <div class="col-6">
@@ -207,7 +220,12 @@
             class="btn btn-block btn-danger"
             (click)="deleteAppointment(i)"
           >
-            Eliminar
+            <div class="d-flex align-items-center">
+              <div class="d-flex mx-auto align-items-center">
+                <span class="material-icons mr-2"> delete </span>
+                <span>Eliminar</span>
+              </div>
+            </div>
           </button>
         </div>
       </div>

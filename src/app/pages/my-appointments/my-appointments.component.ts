@@ -315,12 +315,16 @@ export class MyAppointmentsComponent implements OnInit {
     const beginDate = this.getFormattedDate(this.date, this.beginTime);
     const endDate = this.getFormattedDate(this.date, this.endTime);
 
-    const userHasAppointment = await this.appointmentService.checkIfUserHasAppointment(
-      this.currentAppointment.userUid,
-      beginDate,
-      endDate,
-      this.currentAppointment.eventId
-    );
+    let userHasAppointment = false;
+
+    if (this.currentAppointment.userUid) {
+      userHasAppointment = await this.appointmentService.checkIfUserHasAppointment(
+        this.currentAppointment.userUid,
+        beginDate,
+        endDate,
+        this.currentAppointment.eventId
+      );
+    }
 
     if (!this.checkIfEventOverlaps(beginDate, endDate) && !userHasAppointment) {
       if (
