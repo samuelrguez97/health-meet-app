@@ -102,14 +102,14 @@ export class CalendarComponent implements OnInit {
     }
   }
 
-  setCurrentUserData(response): void {
+  async setCurrentUserData(response): Promise<void> {
     const userData = response[0];
     this.user = {
       ...this.user,
       ...userData,
     };
     this.appointmentService
-      .getAppointments(this.user.physio)
+      .getUserAppointments(this.user.uid)
       .subscribe((response) => this.setAppointments(response));
     this.userDataService
       .getUserAppointmentsLength(this.user.physio)
@@ -220,7 +220,7 @@ export class CalendarComponent implements OnInit {
     });
   }
 
-  handleDateClick(date: any): void {
+  async handleDateClick(date: any): Promise<void> {
     if (this.user.role === 'user') {
       const dateStart = new Date(date.startStr);
       const dateEnd = new Date(date.endStr);
@@ -229,11 +229,16 @@ export class CalendarComponent implements OnInit {
         if (this.timeGreaterThanCurrent(dateStart)) {
           const time = this.diffHours(dateEnd, dateStart);
           if (time <= 1) {
+            const physio = await this.userDataService.getUserDataSnapshot(
+              this.user.physio
+            );
+
             const appointment: Appointment = {
               userNif: this.user.nif,
               userName: `${this.user.name} ${this.user.surname}`,
               userUid: this.user.uid,
               physioUid: this.user.physio,
+              physioName: physio.name,
               date: this.utils.getDateFormatted(dateStart),
               beginDate: date.startStr,
               endDate: date.endStr,

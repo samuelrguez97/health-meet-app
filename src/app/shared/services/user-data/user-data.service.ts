@@ -16,7 +16,7 @@ export class UserDataService {
     public afAuth: AngularFireAuth
   ) {}
 
-  async getUserDataAsync(userId: string): Promise<any> {
+  getUserDataSnapshot(userId: string): Promise<any> {
     return new Promise((resolve) => {
       this.realtimeDb
         .list(`/userData`, (ref) =>
@@ -34,7 +34,7 @@ export class UserDataService {
         .subscribe((res) => {
           resolve(res);
         });
-    }).then((res) => res);
+    }).then((res) => res[0]);
   }
 
   getUserData(userId: string): Observable<any> {
@@ -132,10 +132,10 @@ export class UserDataService {
   }
 
   async addUserAppointment(uid: string): Promise<void> {
-    const userPromise = await this.getUserDataAsync(uid);
-    const length = parseInt(userPromise[0].appointmentsLength) + 1;
+    const userPromise = await this.getUserDataSnapshot(uid);
+    const length = parseInt(userPromise.appointmentsLength) + 1;
     this.updateUserData(
-      userPromise[0].key,
+      userPromise.key,
       'appointmentsLength',
       length,
       () => {}
@@ -143,10 +143,10 @@ export class UserDataService {
   }
 
   async deleteUserAppointment(uid: string): Promise<void> {
-    const userPromise = await this.getUserDataAsync(uid);
-    const length = parseInt(userPromise[0].appointmentsLength) - 1;
+    const userPromise = await this.getUserDataSnapshot(uid);
+    const length = parseInt(userPromise.appointmentsLength) - 1;
     this.updateUserData(
-      userPromise[0].key,
+      userPromise.key,
       'appointmentsLength',
       length,
       () => {}

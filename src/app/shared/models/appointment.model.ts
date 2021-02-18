@@ -4,6 +4,7 @@ export interface Appointment {
   userNif?: string;
   userName?: string;
   physioUid: string;
+  physioName: string;
   date: string;
   beginDate: string;
   endDate: string;

@@ -16,14 +16,14 @@ export class AdminGuard implements CanActivate {
   async canActivate(): Promise<boolean> {
     const user = await this.authService.getCurrentUser();
     if (user) {
-      const response = await this.userDataService.getUserDataAsync(user.uid);
+      const response = await this.userDataService.getUserDataSnapshot(user.uid);
       return this.getUserData(response);
     }
     return false;
   }
 
   getUserData(response): boolean {
-    const user = response[0];
+    const user = response;
     if (user.role === 'physio') {
       return true;
     } else {

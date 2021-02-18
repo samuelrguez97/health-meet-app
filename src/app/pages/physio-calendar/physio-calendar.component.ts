@@ -213,6 +213,7 @@ export class PhysioCalendarComponent implements OnInit {
         if (time <= 1) {
           const appointment: Appointment = {
             physioUid: this.currentPhysio.uid,
+            physioName: this.currentPhysio.name,
             date: this.utils.getDateFormatted(dateStart),
             beginDate: date.startStr,
             endDate: date.endStr,
