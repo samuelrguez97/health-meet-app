@@ -16,13 +16,11 @@ import { UserData } from 'src/app/shared/models/user-data.model';
 export class AppointmentViewModalComponent implements OnInit {
   constructor(
     public activeModal: NgbActiveModal,
-    private appointmentService: AppointmentsService,
-    private userDataService: UserDataService
+    private appointmentService: AppointmentsService
   ) {}
 
   @Input() appointment: Appointment;
   @Input() user: UserData;
-  @Input() physioUid: string;
   @Input() physioView: boolean;
 
   loading: boolean = false;
@@ -33,9 +31,9 @@ export class AppointmentViewModalComponent implements OnInit {
 
   deleteAppointment() {
     this.deletedAppointment = true;
-    this.appointmentService.deleteAppointment(this.appointment.key);
-    this.userDataService.deleteUserAppointment(
-      this.physioView ? this.physioUid : this.user.physio
+    this.appointmentService.deleteAppointment(
+      this.appointment.physioUid,
+      this.appointment.key
     );
   }
 }

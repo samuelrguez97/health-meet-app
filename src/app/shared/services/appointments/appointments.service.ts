@@ -6,13 +6,16 @@ import { map } from 'rxjs/operators';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Appointment } from '../../models/appointment.model';
 
-import Utils from 'src/app/utils/Utils';
+import { UserDataService } from '../user-data/user-data.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppointmentsService {
-  constructor(private realtimeDb: AngularFireDatabase) {}
+  constructor(
+    private realtimeDb: AngularFireDatabase,
+    private userDataService: UserDataService
+  ) {}
 
   getAppointments(physioUid: string): Observable<any> {
     return this.realtimeDb
@@ -100,14 +103,16 @@ export class AppointmentsService {
     this.realtimeDb.object(`/appointments/${key}`).update(appointment);
   }
 
-  deleteAppointment(key: string): void {
-    this.realtimeDb.object(`/appointments/${key}`).remove();
+  async deleteAppointment(physioUid: string, key: string): Promise<void> {
+    this.userDataService
+      .deleteUserAppointment(physioUid)
+      .then(() => this.realtimeDb.object(`/appointments/${key}`).remove());
   }
 
   deleteUserAppointments(uid: string): any {
     this.getUserAppointments(uid).subscribe((list) =>
       list.forEach((appointment) => {
-        this.deleteAppointment(appointment.key);
+        this.deleteAppointment(appointment.physioUid, appointment.key);
       })
     );
   }

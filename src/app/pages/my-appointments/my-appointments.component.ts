@@ -288,9 +288,9 @@ export class MyAppointmentsComponent implements OnInit {
         async (del) => {
           if (del) {
             await this.appointmentService.deleteAppointment(
+              this.currentAppointment.physioUid,
               this.currentAppointment.key
             );
-            this.userDataService.deleteUserAppointment(this.user.key);
           }
         }
       );

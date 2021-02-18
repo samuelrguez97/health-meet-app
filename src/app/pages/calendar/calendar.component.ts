@@ -131,6 +131,7 @@ export class CalendarComponent implements OnInit {
           end: event.endDate,
           extendedProps: {
             eventId: event.eventId,
+            eventPhysioUid: event.physioUid,
             key: event.key,
           },
         };
@@ -206,7 +207,10 @@ export class CalendarComponent implements OnInit {
       today.setHours(0, 0, 0, 0);
       const endDate = new Date(event.end);
       if (endDate < today) {
-        this.appointmentService.deleteAppointment(event.extendedProps.key);
+        this.appointmentService.deleteAppointment(
+          event.extendedProps.eventPhysioUid,
+          event.extendedProps.key
+        );
       } else {
         calendarApi.addEvent(event);
       }

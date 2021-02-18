@@ -305,7 +305,6 @@ export class PhysioCalendarComponent implements OnInit {
         name: selectedEvent.extendedProps.name,
         nif: selectedEvent.extendedProps.nif,
       };
-      modalRef.componentInstance.physioUid = this.currentPhysio.uid;
       modalRef.componentInstance.physioView = true;
       modalRef.result.then(
         () => (this.events = []),
