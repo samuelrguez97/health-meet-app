@@ -115,7 +115,8 @@ export class AppointmentsService {
   async checkIfUserHasAppointment(
     uid: string,
     beginDate: Date,
-    endDate: Date
+    endDate: Date,
+    eventId?: string
   ): Promise<boolean> {
     return await new Promise((resolve) => {
       this.realtimeDb
@@ -130,9 +131,11 @@ export class AppointmentsService {
                 const event = (c as any).payload.val();
                 const eventBeginDate = new Date(event.beginDate);
                 const eventEndDate = new Date(event.endDate);
-                if (
+                if (eventId === event.eventId) {
+                  return false;
+                } else if (
                   (beginDate > eventBeginDate && beginDate < eventEndDate) ||
-                  (endDate >= eventBeginDate && endDate <= eventEndDate) ||
+                  (endDate > eventBeginDate && endDate <= eventEndDate) ||
                   (eventBeginDate > beginDate && eventBeginDate < endDate) ||
                   (eventEndDate > beginDate && eventEndDate <= endDate)
                 ) {
