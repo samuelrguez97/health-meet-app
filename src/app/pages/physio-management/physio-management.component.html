@@ -1,0 +1,16 @@
+<ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+  <li ngbNavItem="physio-calendar">
+    <a ngbNavLink>Calendario</a>
+    <ng-template ngbNavContent>
+      <app-physio-calendar></app-physio-calendar>
+    </ng-template>
+  </li>
+  <li ngbNavItem="my-appointments">
+    <a ngbNavLink>Mis citas</a>
+    <ng-template ngbNavContent>
+      <app-my-appointments></app-my-appointments>
+    </ng-template>
+  </li>
+</ul>
+
+<div [ngbNavOutlet]="nav" class="mt-4"></div>

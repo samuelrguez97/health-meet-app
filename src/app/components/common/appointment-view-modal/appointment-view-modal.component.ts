@@ -5,6 +5,8 @@ import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 import { Appointment } from 'src/app/shared/models/appointment.model';
 import { AppointmentsService } from 'src/app/shared/services/appointments/appointments.service';
+import { UserDataService } from 'src/app/shared/services/user-data/user-data.service';
+import { UserData } from 'src/app/shared/models/user-data.model';
 
 @Component({
   selector: 'app-appointment-view-modal',
@@ -14,32 +16,26 @@ import { AppointmentsService } from 'src/app/shared/services/appointments/appoin
 export class AppointmentViewModalComponent implements OnInit {
   constructor(
     public activeModal: NgbActiveModal,
-    private appointmentService: AppointmentsService
-  ) {
-    this.appointmentService
-      .getAppointmentsLength()
-      .subscribe((response) => this.setAppointmentsLength(response));
-  }
+    private appointmentService: AppointmentsService,
+    private userDataService: UserDataService
+  ) {}
 
   @Input() appointment: Appointment;
+  @Input() user: UserData;
+  @Input() physioUid: string;
+  @Input() physioView: boolean;
 
   loading: boolean = false;
   deletedAppointment: boolean = false;
-  collectionSize: number = 0;
-
   faCheckCircle = faCheckCircle;
 
   ngOnInit(): void {}
 
-  setAppointmentsLength(response: any): void {
-    this.collectionSize = response;
-  }
-
   deleteAppointment() {
     this.deletedAppointment = true;
-    this.appointmentService.deleteAppointment(
-      this.appointment.key,
-      this.collectionSize
+    this.appointmentService.deleteAppointment(this.appointment.key);
+    this.userDataService.deleteUserAppointment(
+      this.physioView ? this.physioUid : this.user.physio
     );
   }
 }

@@ -50,9 +50,10 @@
       <div class="mr-2">Búsqueda por día</div>
       <div class="input-group">
         <input
-          class="form-control"
+          class="form-control bg-white"
           name="busquedaDia"
           [(ngModel)]="busquedaDia"
+          readonly
           ngbDatepicker
           #dB="ngbDatepicker"
         />
@@ -69,18 +70,21 @@
     </div>
     <div class="filter-row col-12 col-xl-2 p-2 d-flex align-items-center">
       <div class="d-flex justify-content-end w-100">
-        <div *ngIf="!filterOn">
+        <div class="mr-2">
           <button
-            class="btn btn-info"
+            class="btn btn-info filter-button"
             (click)="getAppointmentsFilter()"
             (keyup.enter)="getAppointmentsFilter()"
           >
-            Aplicar filtros
+            <span class="material-icons filter-button-icon"> filter_alt </span>
           </button>
         </div>
-        <div *ngIf="filterOn">
-          <button class="btn btn-outline-info" (click)="resetAppointments()">
-            Limpiar filtros
+        <div>
+          <button
+            class="btn btn-outline-danger filter-button"
+            (click)="resetAppointments()"
+          >
+            <span class="material-icons filter-button-icon"> clear </span>
           </button>
         </div>
       </div>
@@ -114,8 +118,8 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let appointment of myAppointments; index as i">
-        <th scope="row">{{ i + 1 }}</th>
+      <tr *ngFor="let appointment of myAppointments">
+        <th scope="row">{{ appointment.id }}</th>
         <td>
           {{ appointment.userNif }}
         </td>
@@ -256,13 +260,14 @@
             <div class="form-group">
               <div class="input-group">
                 <input
-                  class="form-control"
+                  class="form-control bg-white"
                   placeholder="dd-mm-yyyy"
                   name="dpB"
                   [(ngModel)]="date"
                   [minDate]="minDateNgb"
                   [maxDate]="maxDateNgb"
                   [markDisabled]="isDisabled"
+                  readonly
                   ngbDatepicker
                   #dB="ngbDatepicker"
                 />

@@ -1,4 +1,4 @@
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateParserFormatter, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserModule } from '@angular/platform-browser';
 import { LOCALE_ID, NgModule } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -14,6 +14,8 @@ import '@fortawesome/fontawesome-free/css/all.css';
 
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
+
+import { NgbDateCustomParserFormatter } from './utils/NgbDateCustomParserFormatter';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './pages/login/login.component';
@@ -37,6 +39,8 @@ import { ErrorModalComponent } from './components/common/error-modal/error-modal
 import { DeleteUserModalComponent } from './components/common/delete-user-modal/delete-user-modal.component';
 import { AppointmentViewModalComponent } from './components/common/appointment-view-modal/appointment-view-modal.component';
 import { UserManagementComponent } from './pages/user-management/user-management.component';
+import { PhysioCalendarComponent } from './pages/physio-calendar/physio-calendar.component';
+import { PhysioManagementComponent } from './pages/physio-management/physio-management.component';
 
 registerLocaleData(localeEs, 'es');
 
@@ -63,6 +67,8 @@ FullCalendarModule.registerPlugins([
     DeleteUserModalComponent,
     AppointmentViewModalComponent,
     UserManagementComponent,
+    PhysioCalendarComponent,
+    PhysioManagementComponent,
   ],
   imports: [
     BrowserModule,
@@ -77,7 +83,10 @@ FullCalendarModule.registerPlugins([
     FullCalendarModule,
     FontAwesomeModule,
   ],
-  providers: [{ provide: LOCALE_ID, useValue: 'es' }],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'es' },
+    { provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -28,11 +28,7 @@ export class ProfileComponent implements OnInit {
     private appointmentService: AppointmentsService,
     private modalService: NgbModal,
     private router: Router
-  ) {
-    this.appointmentService
-      .getAppointmentsLength()
-      .subscribe((response) => this.setAppointmentsLength(response));
-  }
+  ) {}
 
   user: UserData;
   faEdit = faEdit;
@@ -191,8 +187,7 @@ export class ProfileComponent implements OnInit {
             this.user.uid
           );
           const deleteUserAppointmentsPromise = await this.appointmentService.deleteUserAppointments(
-            this.user.uid,
-            this.collectionSize
+            this.user.uid
           );
           Promise.all([
             deleteUserPromise,

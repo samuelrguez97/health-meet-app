@@ -18,6 +18,18 @@
   background-color: #007bff;
 }
 
+.filter-button {
+  position: relative;
+  height: 40px;
+  width: 40px;
+}
+
+.filter-button-icon {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+}
+
 .appointment-description {
   max-width: 200px;
   word-wrap: break-word;

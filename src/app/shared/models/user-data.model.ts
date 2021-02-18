@@ -1,6 +1,6 @@
 export interface UserData {
   key?: string;
-  physio: string;
+  physio?: string;
   nif: string;
   name: string;
   surname: string;
@@ -8,4 +8,5 @@ export interface UserData {
   uid?: string;
   role: string;
   email?: string;
+  appointmentsLength?: number;
 }

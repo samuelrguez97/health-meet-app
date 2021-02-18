@@ -1,0 +1,233 @@
+<div *ngIf="toastError?.show" class="toast-box justify-content-center d-flex">
+  <div>
+    <ngb-toast
+      class="toast-box-body bg-danger text-light"
+      [autohide]="true"
+      [delay]="3000"
+      (hidden)="closedToast()"
+    >
+      {{ toastError?.msg }}
+    </ngb-toast>
+  </div>
+</div>
+
+<div class="mt-3 mb-3 p-2 box shadow rounded">
+  <div class="row align-items-center h-100 w-100 m-0">
+    <div
+      class="filter-row col-12 col-lg-6 col-xl-5 p-2 d-flex align-items-center"
+    >
+      <div class="filter-separator mr-3"></div>
+      <div class="mr-2">Ver calendario de</div>
+      <div *ngIf="loadingPhysios">
+        <div class="d-flex justify-content-center">
+          <div class="text-primary spinner-border" role="status">
+            <span class="sr-only">Cargando ...</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!loadingPhysios">
+        <select
+          class="form-control"
+          id="currentPhysioUid"
+          (change)="handlePhysioChange($event)"
+          [(ngModel)]="currentPhysioUid"
+        >
+          <option *ngFor="let physio of physios" [value]="physio.uid">
+            {{ physio.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<full-calendar
+  *ngIf="currentPhysio"
+  #calendar
+  [options]="calendarOptions"
+  class="shadow rounded calendarBox"
+>
+</full-calendar>
+
+<ng-template #appointmentModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Confirmar cita</h4>
+    <button
+      type="button"
+      class="close no-outline"
+      aria-label="Close"
+      (click)="modal.dismiss()"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div *ngIf="loading; else form">
+      <div class="d-flex justify-content-center mt-4">
+        <div
+          class="text-primary spinner-border"
+          style="width: 16rem; height: 16rem"
+          role="status"
+        >
+          <span class="sr-only">Cargando ...</span>
+        </div>
+      </div>
+    </div>
+    <div #form *ngIf="!sentAppointment; else sent">
+      <div class="m-3">
+        <div class="label mb-2">Hora inicio cita</div>
+        <div class="info">
+          {{ currentAppointment.beginDate | date: "medium" }}
+        </div>
+      </div>
+      <div class="m-3">
+        <div class="label mb-2">Hora fin cita</div>
+        <div class="info">
+          {{ currentAppointment.endDate | date: "medium" }}
+        </div>
+      </div>
+      <div class="separator mt-4 mb-4 w-100"></div>
+      <form
+        autocomplete="off"
+        [formGroup]="appointmentForm"
+        (ngSubmit)="handleSubmit()"
+      >
+        <div class="form-group form-box rounded p-2">
+          <div class="mt-3 mb-3 ml-2 mr-2 position-relative">
+            <label class="label mb-2" for="userName"
+              >Indica el usuario a citar</label
+            >
+            <input
+              class="form-control"
+              id="userName"
+              formControlName="userName"
+              [value]="userSearched?.name"
+              (input)="handleSearchUser()"
+              [class.is-valid]="userList?.length > 0"
+              [class.is-invalid]="
+                userList?.length === 0 &&
+                !userSearched &&
+                appointmentForm.controls.userName.touched
+              "
+            />
+            <div
+              class="position-absolute box rounded shadow w-100 user-search-box"
+              *ngIf="userList?.length > 0"
+            >
+              <div
+                class="user-search-item"
+                *ngFor="let user of userList"
+                (click)="handleSearchClick(user)"
+              >
+                {{ user.name }} {{ user.surname }}
+              </div>
+            </div>
+            <div class="user-search-show mt-4 box rounded" *ngIf="userSearched">
+              <div><span>Nif:</span> {{ userSearched.nif }}</div>
+              <div>
+                <span>Nombre:</span> {{ userSearched.name }}
+                {{ userSearched.surname }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 mb-3 ml-2 mr-2">
+            <div class="label mb-2">¿Viene de un seguro?</div>
+            <div class="form-check form-check-inline mr-4">
+              <input
+                type="radio"
+                class="form-check-input info"
+                name="type"
+                value="seguro"
+                formControlName="type"
+                [class.is-invalid]="
+                  appointmentForm.controls.type.invalid &&
+                  appointmentForm.controls.type.touched
+                "
+              />
+              <label class="info form-check-label">Sí</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                type="radio"
+                class="form-check-input info"
+                name="type"
+                value="privado"
+                formControlName="type"
+                [class.is-invalid]="
+                  appointmentForm.controls.type.invalid &&
+                  appointmentForm.controls.type.touched
+                "
+              />
+              <label class="info form-check-label">No</label>
+            </div>
+          </div>
+          <div class="mt-3 mb-3 ml-2 mr-2">
+            <label class="label mb-2" for="selectTherapy"
+              >Selecciona el tipo de terapia</label
+            >
+            <select
+              class="form-control"
+              id="selectTherapy"
+              formControlName="therapy"
+            >
+              <option value="indiba">Indiba</option>
+              <option value="masaje">Masaje</option>
+              <option value="tratamiento">Tratamiento reparador</option>
+            </select>
+          </div>
+          <div class="mt-3 mb-3 ml-2 mr-2">
+            <label class="label mb-2" for="pain"
+              >Describe brevemente tu dolencia</label
+            >
+            <textarea
+              class="form-control"
+              id="pain"
+              name="pain"
+              formControlName="pain"
+              rows="3"
+              cols="40"
+            ></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div *ngIf="userHasAppointment">
+      <div class="justify-content-center">
+        <ngb-toast
+          class="mx-auto bg-danger text-light"
+          [autohide]="true"
+          [delay]="3000"
+          (hidden)="userHasAppointment = false"
+        >
+          El usuario ya tiene una cita prevista para esa hora
+        </ngb-toast>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button
+      *ngIf="!sentAppointment"
+      [disabled]="appointmentForm.invalid || !userSearched"
+      type="button"
+      class="btn btn-outline-primary"
+      (click)="handleSubmit()"
+    >
+      Enviar
+    </button>
+    <button
+      *ngIf="sentAppointment"
+      type="button"
+      class="btn btn-outline-primary"
+      (click)="modal.close(); sentAppointment = false"
+    >
+      Confirmar
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #sent>
+  <div class="w-100 text-center pt-5 pb-5">
+    <fa-icon class="doneIcon text-success" [icon]="faCheckCircle"></fa-icon>
+    <div class="doneText text-muted mt-5">¡Cita confirmada correctamente!</div>
+  </div>
+</ng-template>

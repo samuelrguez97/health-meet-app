@@ -1,0 +1,125 @@
+.box {
+  background-color: white;
+}
+
+.filter-row {
+  font-size: 15px;
+  margin: 0;
+}
+
+.filter-separator {
+  width: 2px;
+  height: 50px;
+  background-color: #007bff;
+}
+
+.filter-button {
+  position: relative;
+  height: 40px;
+  width: 40px;
+}
+
+.filter-button-icon {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+}
+
+.calendarBox {
+  background-color: white;
+  padding: 30px;
+}
+
+@media (max-width: 500px) {
+  .calendarBox {
+    padding: 5px;
+  }
+}
+
+.toast-box {
+  position: fixed;
+  height: 150px;
+  left: 0;
+  right: 0;
+  top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 1000;
+}
+
+.toast-box-body {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.buttonInfoMargin {
+  margin: 0 auto;
+  width: 184px;
+}
+
+.modal-title {
+  font-size: 25px;
+}
+
+.no-outline {
+  outline: none;
+}
+
+.separator {
+  height: 1px;
+  background-color: #007bff33;
+}
+
+.form-box {
+  border: 0.5px solid #dee2e6;
+}
+
+.label {
+  font-size: 18px;
+  color: #007bff;
+}
+
+.info {
+  font-size: 16px;
+}
+
+.user-search-box {
+  top: 75px;
+  padding: 10px 0;
+  z-index: 100000;
+}
+
+.user-search-item {
+  padding: 15px;
+  cursor: pointer;
+}
+
+.user-search-show {
+  border: 0.5px solid #dee2e6;
+  font-size: 16px;
+  padding: 16px;
+}
+
+.user-search-show span {
+  color: #007bff;
+}
+
+.user-search-item:hover {
+  color: #ffff;
+  background-color: #3788d8c7;
+}
+
+.doneIcon {
+  font-size: 200px;
+}
+
+.doneText {
+  font-size: 30px;
+}
+
+.reloadCalendarLink {
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: bold;
+}

@@ -34,6 +34,16 @@
     </div>
     <div class="separator mt-4 mb-4 w-100"></div>
     <div class="form-box rounded p-2">
+      <div class="mt-3 mb-3 ml-2 mr-2" *ngIf="physioView">
+        <div class="label mb-2">NIF</div>
+        <div class="info">
+          {{ user.nif }}
+        </div>
+      </div>
+      <div class="mt-3 mb-3 ml-2 mr-2" *ngIf="physioView">
+        <div class="label mb-2">Nombre</div>
+        <div class="info">{{ user.name }} {{ user.surname }}</div>
+      </div>
       <div class="mt-3 mb-3 ml-2 mr-2">
         <div class="label mb-2">Tipo</div>
         <div class="info">

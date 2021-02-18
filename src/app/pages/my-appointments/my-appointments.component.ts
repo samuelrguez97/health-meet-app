@@ -46,15 +46,12 @@ export class MyAppointmentsComponent implements OnInit {
     this.utils
       .checkIfMobile()
       .subscribe((state: BreakpointState) => this.checkIfMobileCallback(state));
-    this.appointmentService
-      .getAppointmentsLength()
-      .subscribe((response) => this.setAppointmentsLength(response));
   }
 
   loading: boolean = true;
   faCheckCircle = faCheckCircle;
 
-  user: User;
+  user: UserData;
   myAppointments: Appointment[] = [];
   myAppointmentsComplete: Appointment[] = [];
   currentAppointment: Appointment;
@@ -62,10 +59,11 @@ export class MyAppointmentsComponent implements OnInit {
 
   error: any = { flag: false, msg: '' };
 
-  /* Appointments pagination */
+  /* Pagination */
   page = 1;
   pageSize = 5;
   collectionSize = 0;
+  currentPage = this.page;
   /* */
 
   /* Búsqueda */
@@ -77,8 +75,7 @@ export class MyAppointmentsComponent implements OnInit {
   busquedaDia: any;
   /* */
 
-  currentPage = this.page;
-
+  /* Selector editar fecha  */
   date: NgbDateStruct;
   beginTime: any;
   endTime: any;
@@ -96,6 +93,7 @@ export class MyAppointmentsComponent implements OnInit {
     day: this.maxDate.getDate(),
   };
   isDisabled = (date: NgbDate) => this.calendar.getWeekday(date) >= 6;
+  /* */
 
   isMobile: boolean = false;
 
@@ -104,7 +102,6 @@ export class MyAppointmentsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.getCurrentUser();
-    this.getAppointments();
   }
 
   getAppointments() {
@@ -113,12 +110,31 @@ export class MyAppointmentsComponent implements OnInit {
       .subscribe((response: Appointment[]) => this.setAppointments(response));
   }
 
+  getUserAppointmentsLength() {
+    this.userDataService
+      .getUserAppointmentsLength(this.user.uid)
+      .subscribe((response) => this.setAppointmentsLength(response));
+  }
+
   async getCurrentUser(): Promise<void> {
     if (!this.user) {
-      await this.authService.getCurrentUser().then(async (response) => {
+      await this.authService.getCurrentUser().then((response) => {
         this.user = response;
+        this.userDataService
+          .getUserData(response.uid)
+          .subscribe((response) => this.setCurrentUserData(response));
       });
     }
+  }
+
+  setCurrentUserData(response): void {
+    const userData = response[0];
+    this.user = {
+      ...this.user,
+      ...userData,
+    };
+    this.getAppointments();
+    this.getUserAppointmentsLength();
   }
 
   setAppointmentsLength(response: any): void {
@@ -272,9 +288,9 @@ export class MyAppointmentsComponent implements OnInit {
         async (del) => {
           if (del) {
             await this.appointmentService.deleteAppointment(
-              this.currentAppointment.key,
-              this.collectionSize
+              this.currentAppointment.key
             );
+            this.userDataService.deleteUserAppointment(this.user.key);
           }
         }
       );
@@ -385,10 +401,11 @@ export class MyAppointmentsComponent implements OnInit {
 
   resetAppointments(): void {
     this.filterOn = false;
+    this.busquedaDia = '';
+    this.busquedaNombre = '';
+    this.busquedaTipo = this.types[0];
     this.getAppointments();
-    this.appointmentService
-      .getCurrentAppointmentsLength()
-      .then((res) => this.setAppointmentsLength(res));
+    this.getUserAppointmentsLength();
   }
 
   refreshAppointments(): void {

@@ -1,6 +1,6 @@
 export interface Appointment {
   key?: string;
-  userUid: string;
+  userUid?: string;
   userNif?: string;
   userName?: string;
   physioUid: string;

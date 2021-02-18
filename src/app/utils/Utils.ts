@@ -17,4 +17,10 @@ export default class Utils {
   getDateFormatted(date: Date): string {
     return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
   }
+
+  getCalendarEndDate(): Date {
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + 2);
+    return endDate;
+  }
 }

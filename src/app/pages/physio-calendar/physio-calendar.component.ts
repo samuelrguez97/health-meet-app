@@ -15,30 +15,35 @@ import { AuthService } from 'src/app/shared/services/auth/auth.service';
 import { UserDataService } from 'src/app/shared/services/user-data/user-data.service';
 import { AppointmentsService } from '../../shared/services/appointments/appointments.service';
 import { NgTemplateOutlet } from '@angular/common';
-import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
+import { BreakpointState } from '@angular/cdk/layout';
 import { Router } from '@angular/router';
 import { AppointmentViewModalComponent } from 'src/app/components/common/appointment-view-modal/appointment-view-modal.component';
 import Utils from 'src/app/utils/Utils';
+import { User } from 'src/app/shared/models/user.model';
 
 @Component({
-  selector: 'app-calendar',
-  templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.css'],
+  selector: 'app-physio-calendar',
+  templateUrl: './physio-calendar.component.html',
+  styleUrls: ['./physio-calendar.component.css'],
 })
-export class CalendarComponent implements OnInit {
+export class PhysioCalendarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private userDataService: UserDataService,
     private appointmentService: AppointmentsService,
     private modalService: NgbModal,
     private formBuilder: FormBuilder,
-    private breakpointObserver: BreakpointObserver,
-    private utils: Utils,
-    private router: Router
+    private utils: Utils
   ) {
     this.crearFormulario();
+    this.loadPhysios();
   }
-  user: UserData;
+
+  loadingPhysios: boolean = false;
+  physios: UserData[];
+  currentPhysioUid: string;
+  currentPhysio: UserData;
+
   appointmentForm: FormGroup;
   currentAppointment: Appointment;
   userAppointments: Appointment[];
@@ -49,9 +54,13 @@ export class CalendarComponent implements OnInit {
 
   faCheckCircle = faCheckCircle;
 
-  private userEvents = [];
-  private otherEvents = [];
-  collectionSize: number = 0;
+  /* Busqueda usuarios */
+  userList: UserData[] = [];
+  userSearched: UserData;
+  userHasAppointment: boolean;
+
+  private events = [];
+  collectionSize = 0;
 
   // references the #calendar in the template
   @ViewChild('calendar') calendarComponent: FullCalendarComponent;
@@ -77,7 +86,7 @@ export class CalendarComponent implements OnInit {
       start: new Date(),
       end: this.utils.getCalendarEndDate(),
     },
-    events: [...this.userEvents, ...this.otherEvents],
+    events: [...this.events],
   };
 
   async ngOnInit(): Promise<void> {
@@ -91,28 +100,42 @@ export class CalendarComponent implements OnInit {
     await this.getCurrentUser();
   }
 
+  async loadPhysios(): Promise<void> {
+    this.loadingPhysios = true;
+    this.physios = await this.userDataService.getAllPhysios();
+    this.loadingPhysios = false;
+  }
+
   async getCurrentUser(): Promise<void> {
-    if (!this.user) {
-      await this.authService.getCurrentUser().then((response) => {
-        this.user = response;
-        this.userDataService
-          .getUserData(response.uid)
-          .subscribe((response) => this.setCurrentUserData(response));
-      });
+    this.loading = true;
+    if (!this.currentPhysio) {
+      setTimeout(
+        async () =>
+          await this.authService.getCurrentUser().then((response) => {
+            this.currentPhysio = response;
+            this.currentPhysioUid = response.uid;
+            this.userDataService
+              .getUserData(response.uid)
+              .subscribe((response) => this.setCurrentUserData(response));
+            this.loading = false;
+          }),
+        150
+      );
     }
   }
 
   setCurrentUserData(response): void {
     const userData = response[0];
-    this.user = {
-      ...this.user,
+    this.currentPhysio = response[0];
+    this.currentPhysio = {
+      ...this.currentPhysio,
       ...userData,
     };
     this.appointmentService
-      .getAppointments(this.user.physio)
+      .getAppointments(this.currentPhysio.uid)
       .subscribe((response) => this.setAppointments(response));
     this.userDataService
-      .getUserAppointmentsLength(this.user.physio)
+      .getUserAppointmentsLength(this.currentPhysio.uid)
       .subscribe((response) => this.setAppointmentsLength(response));
   }
 
@@ -129,43 +152,31 @@ export class CalendarComponent implements OnInit {
         let newEvent: any = {
           start: event.beginDate,
           end: event.endDate,
+          title: `${event.userNif} - ${event.userName}`,
           extendedProps: {
+            name: event.userName,
+            nif: event.userNif,
             eventId: event.eventId,
             key: event.key,
           },
         };
         let existantEvent = false;
-        this.userEvents.forEach((userEvent) => {
-          if (userEvent.extendedProps.eventId === event.eventId) {
-            existantEvent = true;
-          }
-        });
-        this.otherEvents.forEach((userEvent) => {
+        this.events.forEach((userEvent) => {
           if (userEvent.extendedProps.eventId === event.eventId) {
             existantEvent = true;
           }
         });
         if (!existantEvent) {
-          if (event.userUid === this.user.uid) {
-            newEvent = {
-              ...newEvent,
-              extendedProps: {
-                ...newEvent.extendedProps,
-                userId: this.user.uid,
-              },
-            };
-            this.userEvents.push(newEvent);
-          } else {
-            newEvent = {
-              ...newEvent,
-              title: 'Ocupado',
-              color: '#CC0000',
-            };
-            this.otherEvents.push(newEvent);
-          }
+          newEvent = {
+            ...newEvent,
+            extendedProps: {
+              ...newEvent.extendedProps,
+              userId: this.currentPhysio.uid,
+            },
+          };
+          this.events.push(newEvent);
           calendarApi.addEvent(newEvent);
         }
-        this.deletePreviousAppointments();
       });
     }
   }
@@ -174,93 +185,64 @@ export class CalendarComponent implements OnInit {
     const calendarApi = this.calendarComponent.getApi();
     this.userAppointments = [];
     calendarApi.removeAllEvents();
-    this.userEvents = [];
-    this.otherEvents = [];
-  }
-
-  checkIfMobile(): void {
-    this.breakpointObserver
-      .observe(['(min-width: 500px)'])
-      .subscribe((state: BreakpointState) => {
-        if (state.matches) {
-          this.isMobile = false;
-        } else {
-          this.isMobile = true;
-        }
-      });
+    this.events = [];
   }
 
   crearFormulario(): void {
     this.appointmentForm = this.formBuilder.group({
+      userName: ['', [Validators.required]],
       type: ['', [Validators.required]],
       therapy: ['', [Validators.required]],
       pain: ['', [Validators.required]],
     });
   }
 
-  deletePreviousAppointments(): void {
-    const calendarApi = this.calendarComponent.getApi();
-    calendarApi.removeAllEvents();
-    this.userEvents.map((event) => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const endDate = new Date(event.end);
-      if (endDate < today) {
-        this.appointmentService.deleteAppointment(event.extendedProps.key);
-      } else {
-        calendarApi.addEvent(event);
-      }
-    });
-    this.otherEvents.map((event) => {
-      calendarApi.addEvent(event);
-    });
+  handlePhysioChange(event): void {
+    this.userDataService
+      .getUserData(event.target.value)
+      .subscribe((response) => this.setCurrentUserData(response));
   }
 
   handleDateClick(date: any): void {
-    if (this.user.role === 'user') {
-      const dateStart = new Date(date.startStr);
-      const dateEnd = new Date(date.endStr);
+    const dateStart = new Date(date.startStr);
+    const dateEnd = new Date(date.endStr);
 
-      if (!this.checkIfEventOverlaps(dateStart, dateEnd)) {
-        if (this.timeGreaterThanCurrent(dateStart)) {
-          const time = this.diffHours(dateEnd, dateStart);
-          if (time <= 1) {
-            const appointment: Appointment = {
-              userNif: this.user.nif,
-              userName: `${this.user.name} ${this.user.surname}`,
-              userUid: this.user.uid,
-              physioUid: this.user.physio,
-              date: this.utils.getDateFormatted(dateStart),
-              beginDate: date.startStr,
-              endDate: date.endStr,
-              eventId: '_' + Math.random().toString(36).substr(2, 9),
-              type: null,
-              therapy: null,
-              pain: null,
-            };
+    if (!this.checkIfEventOverlaps(dateStart, dateEnd)) {
+      if (this.timeGreaterThanCurrent(dateStart)) {
+        const time = this.diffHours(dateEnd, dateStart);
+        if (time <= 1) {
+          const appointment: Appointment = {
+            physioUid: this.currentPhysio.uid,
+            date: this.utils.getDateFormatted(dateStart),
+            beginDate: date.startStr,
+            endDate: date.endStr,
+            eventId: '_' + Math.random().toString(36).substr(2, 9),
+            type: null,
+            therapy: null,
+            pain: null,
+          };
 
-            this.currentAppointment = appointment;
+          this.currentAppointment = appointment;
 
-            // Abrir modal
-            this.open(this.appointmentModal);
-          } else {
-            this.toastError = {
-              show: true,
-              msg: 'La cita puede durar como máximo 1 hora.',
-            };
-          }
+          // Abrir modal
+          this.open(this.appointmentModal);
         } else {
           this.toastError = {
             show: true,
-            msg: 'La hora de inicio debe ser superior a la actual.',
+            msg: 'La cita puede durar como máximo 1 hora.',
           };
         }
       } else {
         this.toastError = {
           show: true,
-          msg: 'No puedes seleccionar un rango donde ya haya una cita.',
+          msg: 'La hora de inicio debe ser superior a la actual.',
         };
       }
+    } else {
+      this.toastError = {
+        show: true,
+        msg: 'No puedes seleccionar un rango donde ya haya una cita.',
+      };
     }
   }
 
@@ -270,14 +252,7 @@ export class CalendarComponent implements OnInit {
 
   checkIfEventOverlaps(dateStart: Date, dateEnd: Date): boolean {
     let overlaps = false;
-    this.userEvents.forEach((event) => {
-      const eventDateStart = new Date(event.start);
-      const eventDateEnd = new Date(event.end);
-      if (dateStart < eventDateStart && dateEnd >= eventDateEnd) {
-        overlaps = true;
-      }
-    });
-    this.otherEvents.forEach((event) => {
+    this.events.forEach((event) => {
       const eventDateStart = new Date(event.start);
       const eventDateEnd = new Date(event.end);
       if (dateStart < eventDateStart && dateEnd >= eventDateEnd) {
@@ -318,7 +293,7 @@ export class CalendarComponent implements OnInit {
     if (
       selectedEvent &&
       selectedEvent.extendedProps &&
-      selectedEvent.extendedProps.userId === this.user.uid
+      selectedEvent.extendedProps.userId === this.currentPhysio.uid
     ) {
       const modalRef = this.modalService.open(AppointmentViewModalComponent, {
         centered: true,
@@ -326,27 +301,72 @@ export class CalendarComponent implements OnInit {
       modalRef.componentInstance.appointment = this.userAppointments.filter(
         (appointment) => appointment.key === selectedEvent.extendedProps.key
       )[0];
-      modalRef.componentInstance.user = this.user;
+      modalRef.componentInstance.user = {
+        name: selectedEvent.extendedProps.name,
+        nif: selectedEvent.extendedProps.nif,
+      };
+      modalRef.componentInstance.physioUid = this.currentPhysio.uid;
+      modalRef.componentInstance.physioView = true;
       modalRef.result.then(
-        () => (this.userEvents = []),
-        () => (this.userEvents = [])
+        () => (this.events = []),
+        () => (this.events = [])
       );
     }
+  }
+
+  async handleSearchUser(): Promise<void> {
+    const input = this.appointmentForm.value.userName;
+    if (input) {
+      const users: UserData[] = await this.userDataService.getUsersByName(
+        input
+      );
+      this.userList = users;
+    }
+  }
+
+  handleSearchClick(user: UserData): void {
+    this.userSearched = user;
+    this.userList = [];
   }
 
   open(content): void {
     this.modalService
       .open(content, { centered: true, ariaLabelledBy: 'modal-basic-title' })
       .result.then(
-        () => (this.sentAppointment = false),
-        () => (this.sentAppointment = false)
+        () => this.resetNewAppointment(),
+        () => this.resetNewAppointment()
       );
   }
 
-  handleSubmit(): void {
+  resetNewAppointment(): void {
+    this.currentAppointment = null;
+    this.sentAppointment = false;
+    this.userHasAppointment = false;
+    this.userSearched = null;
+    this.appointmentForm.reset();
+  }
+
+  async handleSubmit(): Promise<void> {
     if (this.appointmentForm.invalid) {
       this.appointmentForm.markAsTouched();
       return;
+    }
+
+    const userNif = this.userSearched.nif;
+    const userName = `${this.userSearched.name} ${this.userSearched.surname}`;
+    const userUid = this.userSearched.uid;
+
+    const userHasAppointment = await this.appointmentService.checkIfUserHasAppointment(
+      userUid,
+      new Date(this.currentAppointment.beginDate),
+      new Date(this.currentAppointment.endDate)
+    );
+
+    if (userHasAppointment) {
+      this.userHasAppointment = true;
+      return;
+    } else {
+      this.userHasAppointment = false;
     }
 
     const { type, therapy, pain } = this.appointmentForm.value;
@@ -355,13 +375,16 @@ export class CalendarComponent implements OnInit {
 
     this.currentAppointment = {
       ...this.currentAppointment,
+      userNif,
+      userName,
+      userUid,
       type,
       therapy,
       pain,
     };
 
     this.appointmentService.createAppointment(this.currentAppointment);
-    this.userDataService.addUserAppointment(this.user.physio);
+    this.userDataService.addUserAppointment(this.currentPhysio.uid);
     this.loading = false;
     this.sentAppointment = true;
     this.appointmentForm.reset();

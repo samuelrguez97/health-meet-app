@@ -50,12 +50,10 @@ export class LoginComponent implements OnInit {
     this.loadPhysios();
   }
 
-  loadPhysios(): void {
+  async loadPhysios(): Promise<void> {
     this.loadingPhysios = true;
-    this.userDataService.getUserPhysios().subscribe((response) => {
-      this.physios = response;
-      this.loadingPhysios = false;
-    });
+    this.physios = await this.userDataService.getAllPhysios();
+    this.loadingPhysios = false;
   }
 
   crearFormularios(): void {
@@ -190,7 +188,7 @@ export class LoginComponent implements OnInit {
       this.loading = false;
       this.navbarService.dispathNavbar();
       this.router.navigate([
-        `${user.role === 'user' ? '/home' : '/appointments'}`,
+        `${user.role === 'user' ? '/home' : '/management'}`,
       ]);
     }, 50);
   }
