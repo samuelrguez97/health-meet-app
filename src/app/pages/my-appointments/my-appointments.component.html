@@ -118,7 +118,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let appointment of myAppointments">
+      <tr *ngFor="let appointment of myAppointments; index as i">
         <th scope="row">{{ appointment.id }}</th>
         <td>
           {{ appointment.userNif }}

@@ -134,7 +134,7 @@ export class AppointmentsService {
                   (beginDate > eventBeginDate && beginDate < eventEndDate) ||
                   (endDate >= eventBeginDate && endDate <= eventEndDate) ||
                   (eventBeginDate > beginDate && eventBeginDate < endDate) ||
-                  (eventEndDate >= beginDate && eventEndDate <= endDate)
+                  (eventEndDate > beginDate && eventEndDate <= endDate)
                 ) {
                   return true;
                 } else {
