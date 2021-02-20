@@ -17,15 +17,18 @@ export class UserGuardGuard implements CanActivate {
     const user = await this.authService.getCurrentUser();
     if (user) {
       const response = await this.userDataService.getUserDataSnapshot(user.uid);
-      return this.getUserData(response);
+      return this.handleUserRedirect(response);
     }
     return false;
   }
 
-  getUserData(response): boolean {
+  handleUserRedirect(response): boolean {
     const user = response;
     if (user.role === 'user') {
       return true;
+    } else {
+      this.router.navigate(['/management']);
+      return false;
     }
   }
 }

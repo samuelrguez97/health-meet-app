@@ -389,6 +389,21 @@ export class PhysioCalendarComponent implements OnInit {
 
     const { type, therapy, pain } = this.appointmentForm.value;
 
+    if (type === 'seguro') {
+      if (
+        this.utils.checkIfMoreThanAWeek(
+          new Date(this.currentAppointment.beginDate)
+        )
+      ) {
+        this.toastError = {
+          show: true,
+          msg:
+            'No se puede citar con más de una semana de antelación en caso de venir de un seguro.',
+        };
+        return;
+      }
+    }
+
     if (!this.nonExistentUser) {
       const userNif = this.userSearched.nif;
       const userName = `${this.userSearched.name} ${this.userSearched.surname}`;
@@ -403,6 +418,10 @@ export class PhysioCalendarComponent implements OnInit {
 
       if (userHasAppointment) {
         this.userHasAppointment = true;
+        this.toastError = {
+          show: true,
+          msg: 'El usuario ya tiene una cita prevista para esa hora.',
+        };
         return;
       } else {
         this.userHasAppointment = false;

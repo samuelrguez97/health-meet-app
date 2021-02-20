@@ -326,6 +326,18 @@ export class MyAppointmentsComponent implements OnInit {
       );
     }
 
+    if (this.currentAppointment.type === 'seguro') {
+      if (this.utils.checkIfMoreThanAWeek(new Date(beginDate))) {
+        this.error = {
+          flag: true,
+          msg:
+            'No se puede citar con más de una semana de antelación en caso de venir de un seguro.',
+        };
+        this.loading = false;
+        return;
+      }
+    }
+
     if (!this.checkIfEventOverlaps(beginDate, endDate) && !userHasAppointment) {
       if (
         !this.checkIfSameTimes(

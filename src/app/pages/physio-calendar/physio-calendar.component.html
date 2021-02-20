@@ -11,7 +11,7 @@
   </div>
 </div>
 
-<div class="mt-3 mb-3 p-2 box shadow rounded">
+<div *ngIf="!loading" class="mt-3 mb-3 p-2 box shadow rounded">
   <div class="row align-items-center h-100 w-100 m-0">
     <div
       class="filter-row col-12 col-lg-6 col-xl-5 p-2 d-flex align-items-center"
@@ -239,18 +239,6 @@
             ></textarea>
           </div>
         </form>
-      </div>
-    </div>
-    <div *ngIf="userHasAppointment">
-      <div class="justify-content-center">
-        <ngb-toast
-          class="mx-auto bg-danger text-light"
-          [autohide]="true"
-          [delay]="3000"
-          (hidden)="userHasAppointment = false"
-        >
-          El usuario ya tiene una cita prevista para esa hora
-        </ngb-toast>
       </div>
     </div>
   </div>

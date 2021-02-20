@@ -23,4 +23,10 @@ export default class Utils {
     endDate.setMonth(endDate.getMonth() + 2);
     return endDate;
   }
+
+  checkIfMoreThanAWeek(date: Date): boolean {
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    return date >= today;
+  }
 }

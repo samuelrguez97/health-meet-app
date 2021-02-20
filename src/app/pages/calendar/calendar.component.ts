@@ -377,6 +377,21 @@ export class CalendarComponent implements OnInit {
 
     const { type, therapy, pain } = this.appointmentForm.value;
 
+    if (type === 'seguro') {
+      if (
+        this.utils.checkIfMoreThanAWeek(
+          new Date(this.currentAppointment.beginDate)
+        )
+      ) {
+        this.toastError = {
+          show: true,
+          msg:
+            'No se puede citar con más de una semana de antelación en caso de venir de un seguro.',
+        };
+        return;
+      }
+    }
+
     this.loading = true;
 
     this.currentAppointment = {
